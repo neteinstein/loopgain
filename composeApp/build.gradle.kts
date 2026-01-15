@@ -62,7 +62,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.android)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.koin.android)
-            implementation(platform(libs.firebase.bom))
+            implementation(platform(libs.firebase.bom.get()))
             implementation(libs.firebase.firestore)
             implementation(libs.firebase.analytics)
         }
