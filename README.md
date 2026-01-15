@@ -108,21 +108,25 @@ Edit `gradle/libs.versions.toml` to add new dependencies, then sync the project.
 
 ## 🚀 CI/CD
 
+The project uses GitHub Actions for automated testing, validation, and deployment with parallel job execution and comprehensive test coverage.
+
 ### Workflows
 
 1. **PR Checks** (`pr-checks.yml`): Runs on pull requests
-   - Linting
-   - Unit tests
-   - UI tests
+   - Runs **in parallel**: Linting, Unit tests, UI tests
+   - Automatic cancellation of outdated runs on new commits
+   - All checks must pass before merge
 
 2. **Release** (`release.yml`): Runs on merge to main
-   - Builds release APK/AAB
-   - Creates GitHub release
-   - Uploads artifacts
+   - Runs **in parallel**: Linting, Unit tests, UI tests, Snapshot tests
+   - Builds release APK/AAB only after all validations pass
+   - Creates GitHub release with artifacts
 
 3. **Deploy to Stores** (`deploy-stores.yml`): Manual trigger
    - Deploys to Google Play Store
    - Deploys to Apple App Store
+
+📖 **For detailed CI/CD documentation, see [CI_CD.md](./CI_CD.md)**
 
 ### Required Secrets
 
