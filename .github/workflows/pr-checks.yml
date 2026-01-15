@@ -9,7 +9,7 @@ on:
 
 # Cancel in-progress runs on new commits to the same PR
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 
 # Limit permissions to read-only by default
@@ -25,7 +25,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+        # For pull_request_target, explicitly checkout the PR head
+        ref: ${{ github.event.pull_request.head.sha }}
         persist-credentials: false
       
     - name: Set up JDK 17
@@ -58,7 +59,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+        # For pull_request_target, explicitly checkout the PR head
+        ref: ${{ github.event.pull_request.head.sha }}
         persist-credentials: false
       
     - name: Set up JDK 17
@@ -91,7 +93,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+        # For pull_request_target, explicitly checkout the PR head
+        ref: ${{ github.event.pull_request.head.sha }}
         persist-credentials: false
       
     - name: Set up JDK 17
