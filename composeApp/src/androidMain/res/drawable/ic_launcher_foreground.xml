@@ -4,16 +4,35 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <group
-        android:scaleX="0.5"
-        android:scaleY="0.5"
-        android:translateX="27"
-        android:translateY="27">
-        <path
-            android:fillColor="#7FB3D5"
-            android:pathData="M27,13.5C19.544,13.5 13.5,19.544 13.5,27C13.5,34.456 19.544,40.5 27,40.5C34.456,40.5 40.5,34.456 40.5,27C40.5,19.544 34.456,13.5 27,13.5ZM27,36C22.029,36 18,31.971 18,27C18,22.029 22.029,18 27,18C31.971,18 36,22.029 36,27C36,31.971 31.971,36 27,36Z" />
-        <path
-            android:fillColor="#4A90E2"
-            android:pathData="M27,22.5C24.515,22.5 22.5,24.515 22.5,27C22.5,29.485 24.515,31.5 27,31.5C29.485,31.5 31.5,29.485 31.5,27C31.5,24.515 29.485,22.5 27,22.5Z" />
-    </group>
+    <!-- Deck of cards - back card (slightly offset) -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M35,30 L73,30 L73,78 L35,78 Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M35,30 L73,30 L73,32 L35,32 Z" />
+    
+    <!-- Deck of cards - middle card -->
+    <path
+        android:fillColor="#444444"
+        android:pathData="M32,27 L70,27 L70,75 L32,75 Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M32,27 L70,27 L70,29 L32,29 Z" />
+    
+    <!-- Deck of cards - front card (white) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M29,24 L67,24 L67,72 L29,72 Z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M29,24 L67,24 L67,26 L29,26 Z
+                         M29,24 L31,24 L31,72 L29,72 Z
+                         M67,24 L67,72 L65,72 L65,24 Z
+                         M29,70 L67,70 L67,72 L29,72 Z" />
+    
+    <!-- Letter "L" overlay -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M43,38 L49,38 L49,58 L59,58 L59,64 L43,64 Z" />
 </vector>
