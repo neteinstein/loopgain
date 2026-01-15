@@ -2,7 +2,10 @@ name: PR Checks
 
 on:
   pull_request:
-    branches: [ main, develop ]
+    # Trigger on pull requests to any branch
+  push:
+    branches-ignore:
+      - 'dependabot/**'
 
 # Cancel in-progress runs on new commits to the same PR
 concurrency:
