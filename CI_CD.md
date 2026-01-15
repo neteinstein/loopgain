@@ -11,12 +11,11 @@ The LoopGain project uses GitHub Actions for automated testing, validation, and 
 ### 1. PR Checks (`pr-checks.yml`)
 
 **Trigger:** 
-- `pull_request` - Runs on all pull requests
-- `push` - Runs on pushes to branches (excluding dependabot branches)
+- `pull_request` - Runs when pull requests are opened, synchronized (new commits pushed), or reopened
 
 **Purpose:** Validates code changes through automated testing and linting.
 
-**How it works:** The workflow runs on pushes to PR branches and when PRs are opened/updated, providing immediate feedback on code quality.
+**How it works:** The workflow automatically runs when a PR is created or updated, providing immediate feedback on code quality without duplicate runs.
 
 #### Jobs
 
