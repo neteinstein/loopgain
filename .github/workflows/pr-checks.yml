@@ -3,9 +3,6 @@ name: PR Checks
 on:
   pull_request:
     branches: [ main, develop ]
-  pull_request_target:
-    branches: [ main, develop ]
-    types: [ opened, synchronize, reopened ]
 
 # Cancel in-progress runs on new commits to the same PR
 concurrency:
@@ -24,10 +21,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        # For pull_request_target, explicitly checkout the PR head
-        ref: ${{ github.event.pull_request.head.sha }}
-        persist-credentials: false
       
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -58,10 +51,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        # For pull_request_target, explicitly checkout the PR head
-        ref: ${{ github.event.pull_request.head.sha }}
-        persist-credentials: false
       
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -92,10 +81,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        # For pull_request_target, explicitly checkout the PR head
-        ref: ${{ github.event.pull_request.head.sha }}
-        persist-credentials: false
       
     - name: Set up JDK 17
       uses: actions/setup-java@v4

@@ -12,11 +12,14 @@ The LoopGain project uses GitHub Actions for automated testing, validation, and 
 
 **Trigger:** 
 - `pull_request` - Runs when a Pull Request is created or updated against `main` or `develop` branches
-- `pull_request_target` - Also runs using the base branch workflow definition (allows workflow changes to be validated)
 
-**Purpose:** Validates code changes before they are merged, including validation of workflow file changes.
+**Purpose:** Validates code changes before they are merged.
 
-**Security:** Uses `pull_request_target` with explicit `ref` checkout and `persist-credentials: false` to safely validate PRs that modify workflows.
+**Note on Workflow Changes:** When you modify workflow files (`.github/workflows/*.yml`), the PR checks won't run using the new workflow definition until the changes are merged. This is GitHub's security model - workflows are always read from the base branch, not the PR branch. To validate workflow changes:
+1. Test locally using `act` or similar tools
+2. Ensure YAML syntax is valid
+3. Merge to a test branch first if concerned about breaking workflows
+4. The updated workflow will run on subsequent PRs after being merged
 
 #### Jobs
 
