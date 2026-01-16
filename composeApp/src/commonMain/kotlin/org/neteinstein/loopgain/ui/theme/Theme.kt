@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.Color
 // LoopGain brand colors - based on the official theme specification
 // Primary, Secondary, and Background colors
 private val NavyBlue = Color(0xFF0D2254) // Primary color - headers, primary buttons, heavy text
-private val SteelBlue = Color(0xFF86B3D1) // Secondary color - accents, differentiating categories
+private val SteelBlue = Color(0xFF86B3D1) // Tertiary color - accents, differentiating categories
 private val SkyBlue = Color(0xFFB9D9EB) // Background color - soft backgrounds, cards
 private val Cerulean = Color(0xFF4A90E2) // Secondary accent color
 
