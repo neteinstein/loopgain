@@ -18,11 +18,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import org.neteinstein.loopgain.ui.theme.CardColors
+
+// Card types based on LoopGain theme specification
+enum class CardType(val displayName: String, val color: Color) {
+    MOTTO("MOTTO", CardColors.Motto),
+    PERSONAL_QUESTION("PERSONAL QUESTION", CardColors.PersonalQuestion),
+    IMPROVEMENTS("IMPROVEMENTS", CardColors.Improvements),
+    POSITIVE_REINFORCEMENT("POSITIVE REINFORCEMENT", CardColors.PositiveReinforcement)
+}
 
 data class CardData(
-    val title: String,
+    val type: CardType,
     val content: String,
-    val backgroundColor: Color,
     val rotation: Float,
     val offsetX: Float,
     val offsetY: Float
@@ -32,28 +40,32 @@ data class CardData(
 fun CardDeckScreen() {
     val cards = listOf(
         CardData(
-            title = "MOTTO",
+            type = CardType.MOTTO,
             content = "We are all different,\nwe probably value different\nthings and there is nothing\nwrong about that.",
-            backgroundColor = Color(0xFF1E3A5F), // Dark blue
             rotation = -8f,
             offsetX = -20f,
             offsetY = 30f
         ),
         CardData(
-            title = "",
+            type = CardType.PERSONAL_QUESTION,
             content = "What can we do to\nadmire our differences?",
-            backgroundColor = Color(0xFF5A8FBF), // Medium blue
             rotation = -4f,
             offsetX = -10f,
             offsetY = 15f
         ),
         CardData(
-            title = "",
+            type = CardType.IMPROVEMENTS,
             content = "It all begins with\ncommunication",
-            backgroundColor = Color(0xFF7FB3D5), // Light blue
             rotation = 0f,
             offsetX = 0f,
             offsetY = 0f
+        ),
+        CardData(
+            type = CardType.POSITIVE_REINFORCEMENT,
+            content = "Together we can\naccomplish great things!",
+            rotation = 4f,
+            offsetX = 10f,
+            offsetY = -15f
         )
     )
 
@@ -66,7 +78,7 @@ fun CardDeckScreen() {
         Box(
             modifier = Modifier
                 .width(320.dp)
-                .height(420.dp)
+                .height(500.dp)
         ) {
             cards.reversed().forEachIndexed { index, card ->
                 PiledCard(
@@ -95,7 +107,7 @@ fun PiledCard(
             .zIndex(zIndex),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = card.backgroundColor
+            containerColor = card.type.color
         )
     ) {
         Box(
@@ -107,19 +119,19 @@ fun PiledCard(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                if (card.title.isNotEmpty()) {
-                    Text(
-                        text = card.title,
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp
-                    )
-                }
+                // Card type label at the top
+                Text(
+                    text = card.type.displayName,
+                    color = CardColors.Typography,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.sp
+                )
                 
+                // Card content in the middle
                 Text(
                     text = card.content,
-                    color = Color.White,
+                    color = CardColors.Typography,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Medium,
                     lineHeight = 28.sp,
