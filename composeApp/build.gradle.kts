@@ -9,6 +9,8 @@ plugins {
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 kotlin {
@@ -65,6 +67,7 @@ kotlin {
             implementation(platform(libs.firebase.bom.get()))
             implementation(libs.firebase.firestore)
             implementation(libs.firebase.analytics)
+            implementation(libs.firebase.crashlytics)
         }
         
         iosMain.dependencies {
