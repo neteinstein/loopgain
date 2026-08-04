@@ -4,7 +4,7 @@
 
 ### Required Software
 - **JDK 17 or later** - [Download](https://adoptium.net/)
-- **Android Studio Hedgehog (2023.1.1) or newer** - [Download](https://developer.android.com/studio)
+- **Android Studio (latest stable)** - [Download](https://developer.android.com/studio)
 - **Xcode 15 or later** (macOS only, for iOS development) - [Download from Mac App Store](https://apps.apple.com/app/xcode/id497799835)
 
 ### Recommended IDE Plugins

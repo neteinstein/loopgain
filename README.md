@@ -33,9 +33,9 @@ loopgain/
 ### Prerequisites
 
 - **JDK 17** or higher
-- **Android Studio** Hedgehog or newer (for Android development)
+- **Android Studio** (latest stable, for Android development)
 - **Xcode 15** or newer (for iOS development, macOS only)
-- **Gradle 8.11.1** (included via wrapper)
+- **Gradle 8.14.5** (included via wrapper)
 
 ### Building the Project
 
@@ -64,13 +64,16 @@ xcodebuild -workspace iosApp.xcworkspace -scheme iosApp -configuration Debug
 
 ## 📦 Tech Stack
 
-- **Kotlin Multiplatform**: 2.1.0
-- **Compose Multiplatform**: 1.7.1
-- **Ktor**: 3.0.2 (Networking)
-- **Koin**: 4.0.0 (Dependency Injection)
-- **Coil**: 3.0.4 (Image Loading)
-- **Firebase**: 33.7.0 (Backend services)
-- **kotlinx.serialization**: 1.7.3 (JSON handling)
+- **Kotlin Multiplatform**: 2.4.10
+- **Compose Multiplatform**: 1.11.1
+- **Android Gradle Plugin**: 8.13.2
+- **Ktor**: 3.5.2 (Networking)
+- **Koin**: 4.2.2 (Dependency Injection)
+- **Coil**: 3.5.0 (Image Loading)
+- **Firebase BOM**: 34.16.0 (Backend services)
+- **kotlinx.serialization**: 1.11.0 (JSON handling)
+- **kotlinx.coroutines**: 1.11.0
+- **Compose Navigation**: 2.9.2
 
 ## 🎨 Design
 
