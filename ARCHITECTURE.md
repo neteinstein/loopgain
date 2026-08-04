@@ -81,9 +81,10 @@ iOS application wrapper written in Swift:
 ## Technology Stack
 
 ### Core
-- **Kotlin**: 2.1.0
-- **Compose Multiplatform**: 1.7.1
-- **Kotlin Coroutines**: Asynchronous programming
+- **Kotlin**: 2.4.10
+- **Compose Multiplatform**: 1.11.1
+- **Android Gradle Plugin**: 8.13.2
+- **Kotlin Coroutines**: 1.11.0 (Asynchronous programming)
 
 ### UI
 - **Material3**: Design system

@@ -30,7 +30,7 @@ cd loopgain
 1. Create an Android Virtual Device (AVD):
    - Tools → Device Manager → Create Device
    - Choose Pixel 5 or similar
-   - Select API 34 (Android 14)
+   - Select API 36 (Android 16)
    - Finish
 
 2. Select "composeApp" configuration

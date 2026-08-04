@@ -169,18 +169,18 @@ loopgain/
 ## 🔧 Technologies Integrated
 
 ### Core Framework
-- ✅ Kotlin Multiplatform 2.1.0
-- ✅ Compose Multiplatform 1.7.1
-- ✅ Android Gradle Plugin 8.5.2
+- ✅ Kotlin Multiplatform 2.4.10
+- ✅ Compose Multiplatform 1.11.1
+- ✅ Android Gradle Plugin 8.13.2
 
 ### Libraries
-- ✅ Ktor 3.0.2 (Networking)
-- ✅ Koin 4.0.0 (Dependency Injection)
-- ✅ Coil 3.0.4 (Image Loading)
-- ✅ Firebase BOM 33.7.0
-- ✅ kotlinx.serialization 1.7.3
-- ✅ kotlinx.coroutines 1.9.0
-- ✅ Compose Navigation 2.8.0-alpha10
+- ✅ Ktor 3.5.2 (Networking)
+- ✅ Koin 4.2.2 (Dependency Injection)
+- ✅ Coil 3.5.0 (Image Loading)
+- ✅ Firebase BOM 34.16.0
+- ✅ kotlinx.serialization 1.11.0
+- ✅ kotlinx.coroutines 1.11.0
+- ✅ Compose Navigation 2.9.2 (stable)
 
 ### Testing
 - ✅ kotlin.test
