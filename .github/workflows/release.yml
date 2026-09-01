@@ -29,7 +29,7 @@ jobs:
       run: chmod +x gradlew
 
     - name: Create placeholder google-services.json for CI
-      run: cp .github/ci/google-services.json.ci composeApp/google-services.json
+      run: cp .github/ci/google-services.json.ci androidApp/google-services.json
 
     - name: Run linting
       run: ./gradlew lint --no-daemon
@@ -62,7 +62,7 @@ jobs:
       run: chmod +x gradlew
 
     - name: Create placeholder google-services.json for CI
-      run: cp .github/ci/google-services.json.ci composeApp/google-services.json
+      run: cp .github/ci/google-services.json.ci androidApp/google-services.json
 
     - name: Run unit tests
       run: ./gradlew testDebugUnitTest --no-daemon
@@ -95,7 +95,7 @@ jobs:
       run: chmod +x gradlew
 
     - name: Create placeholder google-services.json for CI
-      run: cp .github/ci/google-services.json.ci composeApp/google-services.json
+      run: cp .github/ci/google-services.json.ci androidApp/google-services.json
 
     - name: Run instrumented tests
       uses: reactivecircus/android-emulator-runner@v2
@@ -132,7 +132,7 @@ jobs:
       run: chmod +x gradlew
 
     - name: Create placeholder google-services.json for CI
-      run: cp .github/ci/google-services.json.ci composeApp/google-services.json
+      run: cp .github/ci/google-services.json.ci androidApp/google-services.json
 
     - name: Run snapshot tests
       run: ./gradlew verifyPaparazziDebug --no-daemon
@@ -176,7 +176,7 @@ jobs:
     - name: Get version
       id: version
       run: |
-        echo "VERSION=$(grep 'versionName' composeApp/build.gradle.kts | awk -F'"' '{print $2}')" >> $GITHUB_OUTPUT
+        echo "VERSION=$(grep 'versionName' androidApp/build.gradle.kts | awk -F'"' '{print $2}')" >> $GITHUB_OUTPUT
         echo "BUILD=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
         
     - name: Create Release
@@ -196,6 +196,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./composeApp/build/outputs/apk/release/composeApp-release-unsigned.apk
+        asset_path: ./androidApp/build/outputs/apk/release/androidApp-release-unsigned.apk
         asset_name: loopgain-${{ steps.version.outputs.VERSION }}.apk
         asset_content_type: application/vnd.android.package-archive

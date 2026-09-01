@@ -31,20 +31,20 @@ cd loopgain
 ### Android
 
 #### From Android Studio
-1. Select "composeApp" from the run configuration dropdown
+1. Select "androidApp" from the run configuration dropdown
 2. Select an emulator or connected device
 3. Click the Run button (green triangle)
 
 #### From Command Line
 ```bash
 # Debug build
-./gradlew :composeApp:assembleDebug
+./gradlew :androidApp:assembleDebug
 
 # Release build
-./gradlew :composeApp:assembleRelease
+./gradlew :androidApp:assembleRelease
 
 # Install on connected device
-./gradlew :composeApp:installDebug
+./gradlew :androidApp:installDebug
 ```
 
 ### iOS
@@ -75,7 +75,7 @@ xcodebuild -scheme iosApp -configuration Debug
 ./gradlew testDebugUnitTest
 
 # Common (shared) tests
-./gradlew :composeApp:commonTest
+./gradlew :composeApp:testDebugUnitTest
 ```
 
 ### UI Tests (Android)
@@ -109,7 +109,7 @@ The project follows Kotlin coding conventions. Format code in Android Studio wit
 2. Create a new project or select existing
 3. Add an Android app with package name: `org.neteinstein.loopgain`
 4. Download `google-services.json`
-5. Place it in `composeApp/` directory
+5. Place it in `androidApp/` directory
 
 ### iOS
 1. In the same Firebase project, add an iOS app
@@ -153,7 +153,7 @@ repositories {
 
 ```
 loopgain/
-├── composeApp/                 # Main multiplatform module
+├── composeApp/                 # Shared KMP library module
 │   ├── src/
 │   │   ├── commonMain/         # Shared code (Android + iOS)
 │   │   │   └── kotlin/org/neteinstein/loopgain/
@@ -161,10 +161,12 @@ loopgain/
 │   │   │       ├── data/       # Data layer
 │   │   │       ├── domain/     # Business logic
 │   │   │       └── di/         # Dependency injection
-│   │   ├── androidMain/        # Android-specific code
+│   │   ├── androidMain/        # Android-specific shared code
 │   │   ├── iosMain/            # iOS-specific code
 │   │   └── commonTest/         # Shared tests
 │   └── build.gradle.kts        # Module build configuration
+├── androidApp/                 # Android app entry point
+│   └── src/main/               # Manifest, MainActivity, LoopGainApplication, Firebase
 ├── iosApp/                     # iOS application wrapper
 │   └── iosApp/
 │       ├── iOSApp.swift        # iOS app entry point
