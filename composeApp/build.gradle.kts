@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
@@ -10,6 +9,8 @@ plugins {
 }
 
 kotlin {
+    jvmToolchain(17)
+
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     android {
         namespace = "org.neteinstein.loopgain.shared"
@@ -19,10 +20,6 @@ kotlin {
         withHostTestBuilder {}.configure {}
         withDeviceTestBuilder {
             sourceSetTreeName = "test"
-        }
-
-        compilerOptions.configure {
-            jvmTarget.set(JvmTarget.JVM_17)
         }
 
         androidResources {
