@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.2"
+agp = "9.3.0"
 kotlin = "2.4.10"
 compose = "1.11.1"
 compose-plugin = "1.11.1"
@@ -12,7 +12,7 @@ ktor = "3.5.2"
 coil = "3.5.0"
 koin = "4.2.2"
 firebase-bom = "34.16.0"
-firebase-crashlytics-plugin = "3.0.7"
+firebase-crashlytics-plugin = "3.0.8"
 google-services = "4.5.0"
 
 [libraries]
@@ -47,6 +47,7 @@ kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
+androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

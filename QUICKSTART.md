@@ -33,7 +33,7 @@ cd loopgain
    - Select API 36 (Android 16)
    - Finish
 
-2. Select "composeApp" configuration
+2. Select "androidApp" configuration
 3. Select your emulator
 4. Click Run ▶️
 
@@ -102,7 +102,7 @@ xcodebuild clean
 3. Add Android app:
    - Package: `org.neteinstein.loopgain`
    - Download `google-services.json`
-   - Place in `composeApp/` directory
+   - Place in `androidApp/` directory
 4. Add iOS app:
    - Bundle ID: `org.neteinstein.loopgain`
    - Download `GoogleService-Info.plist`

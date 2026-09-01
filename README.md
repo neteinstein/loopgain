@@ -19,10 +19,11 @@ LoopGain is built following modern Kotlin Multiplatform architecture, enabling c
 
 ```
 loopgain/
-├── composeApp/          # Shared multiplatform module
+├── composeApp/          # Shared KMP library module
 │   ├── commonMain/      # Shared business logic and UI
-│   ├── androidMain/     # Android-specific code
+│   ├── androidMain/     # Android-specific shared code
 │   └── iosMain/         # iOS-specific code
+├── androidApp/          # Android app entry point (manifest, MainActivity, Firebase)
 ├── iosApp/              # iOS app wrapper
 ├── .github/workflows/   # CI/CD pipelines
 └── gradle/              # Gradle configuration
@@ -35,14 +36,14 @@ loopgain/
 - **JDK 17** or higher
 - **Android Studio** (latest stable, for Android development)
 - **Xcode 15** or newer (for iOS development, macOS only)
-- **Gradle 8.14.5** (included via wrapper)
+- **Gradle 9.7.1** (included via wrapper)
 
 ### Building the Project
 
 #### Android
 
 ```bash
-./gradlew :composeApp:assembleDebug
+./gradlew :androidApp:assembleDebug
 ```
 
 #### iOS
@@ -66,7 +67,7 @@ xcodebuild -workspace iosApp.xcworkspace -scheme iosApp -configuration Debug
 
 - **Kotlin Multiplatform**: 2.4.10
 - **Compose Multiplatform**: 1.11.1
-- **Android Gradle Plugin**: 8.13.2
+- **Android Gradle Plugin**: 9.3.0
 - **Ktor**: 3.5.2 (Networking)
 - **Koin**: 4.2.2 (Dependency Injection)
 - **Coil**: 3.5.0 (Image Loading)
@@ -148,7 +149,7 @@ For store deployment, configure these GitHub secrets:
 
 To enable Firebase features:
 
-1. Add `google-services.json` to `composeApp/` (Android)
+1. Add `google-services.json` to `androidApp/` (Android)
 2. Add `GoogleService-Info.plist` to `iosApp/` (iOS)
 3. Initialize Firebase in the Application class (already configured)
 

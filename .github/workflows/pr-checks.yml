@@ -33,7 +33,7 @@ jobs:
       run: chmod +x gradlew
 
     - name: Create placeholder google-services.json for CI
-      run: cp .github/ci/google-services.json.ci composeApp/google-services.json
+      run: cp .github/ci/google-services.json.ci androidApp/google-services.json
 
     - name: Run linting
       run: ./gradlew lint --no-daemon
@@ -66,7 +66,7 @@ jobs:
       run: chmod +x gradlew
 
     - name: Create placeholder google-services.json for CI
-      run: cp .github/ci/google-services.json.ci composeApp/google-services.json
+      run: cp .github/ci/google-services.json.ci androidApp/google-services.json
 
     - name: Run unit tests
       run: ./gradlew testDebugUnitTest --no-daemon
@@ -99,7 +99,7 @@ jobs:
       run: chmod +x gradlew
 
     - name: Create placeholder google-services.json for CI
-      run: cp .github/ci/google-services.json.ci composeApp/google-services.json
+      run: cp .github/ci/google-services.json.ci androidApp/google-services.json
 
     - name: Run instrumented tests
       uses: reactivecircus/android-emulator-runner@v2

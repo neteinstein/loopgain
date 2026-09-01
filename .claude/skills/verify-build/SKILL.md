@@ -42,7 +42,7 @@ Three parallel jobs on JDK 17, gated by a summary job that fails if any of them 
 | unit-tests | `./gradlew testDebugUnitTest --no-daemon` (this is what runs `commonTest`) |
 | ui-tests | `./gradlew connectedDebugAndroidTest --no-daemon` on an API 29 emulator |
 
-Each job first copies `.github/ci/google-services.json.ci` to `composeApp/google-services.json`.
+Each job first copies `.github/ci/google-services.json.ci` to `androidApp/google-services.json`.
 A failure mentioning a missing `google-services.json` means that step, not your code.
 
 Reports are uploaded as artifacts (`lint-reports`, `unit-test-reports`, `ui-test-reports`) —

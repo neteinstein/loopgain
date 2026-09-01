@@ -45,20 +45,27 @@ Two skills wrap these documents so you don't have to re-derive them:
 ## Where the code is
 
 ```
-composeApp/src/
+composeApp/src/                  # shared KMP library module (com.android.kotlin.multiplatform.library)
 ├── commonMain/kotlin/org/neteinstein/loopgain/   # shared — put code here by default
 │   ├── App.kt                 # theme + navigation entry point
 │   ├── di/AppModule.kt        # Koin module (currently empty)
 │   └── ui/{screens,theme,navigation}/
-├── androidMain/               # MainActivity, LoopGainApplication, res/, manifest
-├── iosMain/                   # MainViewController.kt
-└── commonTest/                # kotlin.test, runs on the JVM via testDebugUnitTest
+├── androidMain/                # Android-specific shared code, if any (no app entry point here)
+├── iosMain/                    # MainViewController.kt
+└── commonTest/                 # kotlin.test, runs on the JVM via testDebugUnitTest
+androidApp/src/main/            # Android app entry point (com.android.application)
+├── AndroidManifest.xml
+├── kotlin/org/neteinstein/loopgain/{MainActivity,LoopGainApplication}.kt
+└── res/                        # launcher icons, app name
 iosApp/                        # Swift wrapper (iOSApp.swift, ContentView.swift)
 ```
 
 `commonMain` first, always. Reach for `androidMain` / `iosMain` (or `expect`/`actual`) only for
-something a platform genuinely cannot share — Firebase and the activity/view-controller hosts
-are the current examples.
+something a platform genuinely cannot share. Android's actual app entry point — the manifest,
+`MainActivity`, `LoopGainApplication`, Firebase — lives in the separate `androidApp` module, not
+in `composeApp`: since AGP 9, a module can't apply both `org.jetbrains.kotlin.multiplatform` and
+`com.android.application` together, so the KMP library (`composeApp`) and the Android app
+(`androidApp`) had to split.
 
 `ARCHITECTURE.md` documents `domain/`, `data/` and `ui/components/` packages that **do not exist
 yet**. Creating them is expected work, not a mistake in the doc.
@@ -92,7 +99,7 @@ add dependencies there, never inline in a build file.
 ./gradlew lint                      # what CI's lint job runs
 ./gradlew testDebugUnitTest         # commonTest, on the JVM
 ./gradlew connectedDebugAndroidTest # instrumented; needs an emulator
-./gradlew :composeApp:assembleDebug
+./gradlew :androidApp:assembleDebug
 ```
 
 **Cloud agent containers cannot build this project.** `dl.google.com` is blocked by the egress
@@ -125,7 +132,7 @@ failure.
 - Agent branches follow `claude/<short-topic>-<suffix>`; push with `git push -u origin <branch>`.
 - `.github/pull_request_template.md` is the PR body: Summary / Changes / Test plan / Risk. Fill
   in the test plan honestly, including what you could not run and why.
-- Never commit `composeApp/google-services.json` — it is gitignored. CI copies
+- Never commit `androidApp/google-services.json` — it is gitignored. CI copies
   `.github/ci/google-services.json.ci` into place; that placeholder is for validation only.
 - Store credentials stay in GitHub secrets (`README.md` lists them). Nothing secret goes in the
   repo, a PR body or a comment.
