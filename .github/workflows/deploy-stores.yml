@@ -49,7 +49,7 @@ jobs:
       with:
         serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
         packageName: org.neteinstein.loopgain
-        releaseFiles: composeApp/build/outputs/bundle/release/composeApp-release.aab
+        releaseFiles: androidApp/build/outputs/bundle/release/androidApp-release.aab
         track: production
         status: completed
 
