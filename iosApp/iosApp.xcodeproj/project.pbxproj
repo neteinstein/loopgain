@@ -63,10 +63,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A0A0A0A0A0A0A0A0A0A0A016 /* Build configuration list for PBXNativeTarget "iosApp" */;
 			buildPhases = (
+				A0A0A0A0A0A0A0A0A0A0A00B /* Compile Kotlin Framework */,
 				A0A0A0A0A0A0A0A0A0A0A007 /* Sources */,
 				A0A0A0A0A0A0A0A0A0A0A009 /* Frameworks */,
 				A0A0A0A0A0A0A0A0A0A0A008 /* Resources */,
-				A0A0A0A0A0A0A0A0A0A0A00B /* Compile Kotlin Framework */,
 			);
 			buildRules = (
 			);
