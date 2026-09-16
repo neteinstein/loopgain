@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.ui.theme.CardStyles
@@ -22,20 +23,22 @@ import org.neteinstein.loopgain.ui.viewmodel.CardFaceUi
 /**
  * The printed card's face: category top-left, level dots top-right, question centred. One
  * component for the read screen, the rounds screen and (reused by other layouts) any carousel or
- * grid — see .claude/skills/card-face.
+ * grid — see .claude/skills/card-face. [compact] scales it down for small tiles like a draw pile,
+ * where the question still has to fit but the footer and full type scale don't.
  */
 @Composable
 fun QuestionCardFace(
     card: CardFaceUi,
     modifier: Modifier = Modifier,
     showFooter: Boolean = true,
+    compact: Boolean = false,
 ) {
     val style = CardStyles.forCategory(card.category)
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(if (compact) 10.dp else 16.dp))
             .background(style.containerColor)
-            .padding(20.dp),
+            .padding(if (compact) 11.dp else 20.dp),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Row(
@@ -46,22 +49,30 @@ fun QuestionCardFace(
             Text(
                 text = card.label.uppercase(),
                 color = style.labelColor,
-                fontSize = 11.sp,
+                fontSize = if (compact) 9.sp else 11.sp,
                 fontWeight = FontWeight.SemiBold,
-                letterSpacing = 1.5.sp,
+                letterSpacing = if (compact) 1.sp else 1.5.sp,
             )
-            LevelDots(level = card.level, activeColor = style.labelColor, inactiveColor = style.contentColor.copy(alpha = 0.25f))
+            LevelDots(
+                level = card.level,
+                activeColor = style.labelColor,
+                inactiveColor = style.contentColor.copy(alpha = 0.25f),
+                dotSize = if (compact) 5.dp else 6.dp,
+                spacing = if (compact) 3.dp else 4.dp,
+            )
         }
 
         Text(
             text = card.text,
             color = style.contentColor,
-            fontSize = 24.sp,
+            fontSize = if (compact) 13.sp else 24.sp,
             fontWeight = FontWeight.Bold,
-            lineHeight = 30.sp,
+            lineHeight = if (compact) 16.sp else 30.sp,
+            maxLines = if (compact) 6 else Int.MAX_VALUE,
+            overflow = if (compact) TextOverflow.Ellipsis else TextOverflow.Clip,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp),
+                .padding(vertical = if (compact) 6.dp else 12.dp),
         )
 
         if (showFooter) {
