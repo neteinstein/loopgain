@@ -22,7 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.ui.theme.CardStyles
-import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
+import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
 import org.neteinstein.loopgain.ui.viewmodel.SessionUiState
 
 @Composable
@@ -39,28 +40,28 @@ fun SessionRoundsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
         ) {
-            Text(text = "RECEIVING FEEDBACK", color = SessionPalette.MutedLabel, fontSize = 10.sp, letterSpacing = 1.8.sp)
+            Text(text = SessionCopy.receivingFeedback(state.language), color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp, letterSpacing = 1.8.sp)
             Text(
                 text = state.currentPersonName.uppercase(),
-                color = SessionPalette.Ink,
+                color = LocalSessionColors.current.Ink,
                 fontSize = 34.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 4.dp, bottom = 10.dp),
             )
             Text(
                 text = state.turnPhaseLabel,
-                color = SessionPalette.Accent,
+                color = LocalSessionColors.current.Accent,
                 fontSize = 10.sp,
                 letterSpacing = 1.2.sp,
                 modifier = Modifier
-                    .background(SessionPalette.PanelBackground)
+                    .background(LocalSessionColors.current.PanelBackground)
                     .padding(horizontal = 10.dp, vertical = 7.dp),
             )
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, SessionPalette.Accent)
+                    .border(1.dp, LocalSessionColors.current.Accent)
                     .padding(12.dp)
                     .padding(top = 14.dp),
                 verticalAlignment = Alignment.Bottom,
@@ -68,11 +69,11 @@ fun SessionRoundsScreen(
             ) {
                 Text(
                     text = state.turnClock,
-                    color = if (state.turnOver) SessionPalette.AccentBright else SessionPalette.Ink,
+                    color = if (state.turnOver) LocalSessionColors.current.AccentBright else LocalSessionColors.current.Ink,
                     fontSize = 38.sp,
                     fontWeight = FontWeight.Bold,
                 )
-                Text(text = state.turnNote, color = SessionPalette.MutedLabel, fontSize = 11.sp, modifier = Modifier.weight(1f))
+                Text(text = state.turnNote, color = LocalSessionColors.current.MutedLabel, fontSize = 11.sp, modifier = Modifier.weight(1f))
             }
 
             Column(
@@ -84,7 +85,7 @@ fun SessionRoundsScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(1.dp, SessionPalette.Border)
+                            .border(1.dp, LocalSessionColors.current.Border)
                             .padding(12.dp),
                     ) {
                         Text(
@@ -96,7 +97,7 @@ fun SessionRoundsScreen(
                         )
                         Text(
                             text = card.text,
-                            color = SessionPalette.Ink,
+                            color = LocalSessionColors.current.Ink,
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(top = 7.dp),
@@ -106,8 +107,8 @@ fun SessionRoundsScreen(
             }
 
             Text(
-                text = "ORDER",
-                color = SessionPalette.MutedLabel,
+                text = SessionCopy.orderLabel(state.language),
+                color = LocalSessionColors.current.MutedLabel,
                 fontSize = 10.sp,
                 letterSpacing = 1.6.sp,
                 modifier = Modifier.padding(top = 14.dp, bottom = 8.dp),
@@ -117,20 +118,20 @@ fun SessionRoundsScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(if (row.isCurrent) SessionPalette.PanelBackground else androidx.compose.ui.graphics.Color.Transparent)
-                            .border(1.dp, if (row.isCurrent) SessionPalette.Accent else androidx.compose.ui.graphics.Color.Transparent)
+                            .background(if (row.isCurrent) LocalSessionColors.current.PanelBackground else androidx.compose.ui.graphics.Color.Transparent)
+                            .border(1.dp, if (row.isCurrent) LocalSessionColors.current.Accent else androidx.compose.ui.graphics.Color.Transparent)
                             .padding(horizontal = 11.dp, vertical = 9.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
-                        Text(text = "${row.index}", color = SessionPalette.MutedSecondary, fontSize = 10.sp)
+                        Text(text = "${row.index}", color = LocalSessionColors.current.MutedSecondary, fontSize = 10.sp)
                         Text(
                             text = row.name,
-                            color = if (row.isDone) SessionPalette.MutedSecondary else SessionPalette.Ink,
+                            color = if (row.isDone) LocalSessionColors.current.MutedSecondary else LocalSessionColors.current.Ink,
                             fontSize = 14.sp,
                             modifier = Modifier.weight(1f),
                         )
-                        Text(text = row.tag, color = SessionPalette.Accent, fontSize = 9.sp, letterSpacing = 1.sp)
+                        Text(text = row.tag, color = LocalSessionColors.current.Accent, fontSize = 9.sp, letterSpacing = 1.sp)
                     }
                 }
             }
@@ -140,13 +141,13 @@ fun SessionRoundsScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(SessionPalette.Ink)
+                    .background(LocalSessionColors.current.Ink)
                     .padding(horizontal = 16.dp, vertical = 11.dp),
             ) {
-                Text(text = "FIVE MINUTES LEFT", color = SessionPalette.Background, fontSize = 10.sp, letterSpacing = 1.6.sp)
+                Text(text = SessionCopy.fiveMinutesLeft(state.language), color = LocalSessionColors.current.Background, fontSize = 10.sp, letterSpacing = 1.6.sp)
                 Text(
-                    text = "Finish this turn, then decide together: close, or carry the rest to next session.",
-                    color = SessionPalette.PanelBackground,
+                    text = SessionCopy.finishTurnNote(state.language),
+                    color = LocalSessionColors.current.PanelBackground,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 5.dp),
                 )
@@ -156,21 +157,21 @@ fun SessionRoundsScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(SessionPalette.PanelBackground)
+                .background(LocalSessionColors.current.PanelBackground)
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(9.dp),
         ) {
             OutlinedButton(
                 onClick = onSkip,
                 shape = RoundedCornerShape(4.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = SessionPalette.Accent),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = LocalSessionColors.current.Accent),
             ) {
-                Text(text = "CLOSE", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
+                Text(text = SessionCopy.closeLabel(state.language), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
             }
             Button(
                 onClick = onAdvance,
                 shape = RoundedCornerShape(4.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = SessionPalette.Accent, contentColor = SessionPalette.OnAccent),
+                colors = ButtonDefaults.buttonColors(containerColor = LocalSessionColors.current.Accent, contentColor = LocalSessionColors.current.OnAccent),
                 modifier = Modifier.weight(1f),
             ) {
                 Text(text = state.advanceLabel, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)

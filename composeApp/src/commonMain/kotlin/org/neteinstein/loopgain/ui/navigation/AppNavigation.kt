@@ -19,6 +19,7 @@ import org.neteinstein.loopgain.ui.screens.CardDeckScreen
 import org.neteinstein.loopgain.ui.screens.LoadingScreen
 import org.neteinstein.loopgain.ui.screens.session.SessionFlowScreen
 import org.neteinstein.loopgain.ui.screens.session.tablet.TabletSessionFlowScreen
+import org.neteinstein.loopgain.ui.screens.settings.SettingsScreen
 import org.neteinstein.loopgain.ui.viewmodel.SessionViewModel
 
 /**
@@ -36,6 +37,7 @@ sealed class Screen(val route: String) {
     // deleted — while the new session flow settles in. See AGENTS.md.
     data object CardDeck : Screen("card_deck")
     data object Session : Screen("session")
+    data object Settings : Screen("settings")
 }
 
 @Composable
@@ -62,13 +64,24 @@ fun AppNavigation() {
             // One SessionViewModel instance shared by whichever layout renders — session state
             // must not fork between the phone and tablet UIs.
             val viewModel: SessionViewModel = koinViewModel()
-            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                if (maxWidth >= TABLET_MIN_WIDTH) {
-                    TabletSessionFlowScreen(viewModel = viewModel)
-                } else {
-                    SessionFlowScreen(viewModel = viewModel)
+            val onSettingsClick = { navController.navigate(Screen.Settings.route) }
+            val onFinish = {
+                viewModel.resetSession()
+                navController.navigate(Screen.Loading.route) {
+                    popUpTo(Screen.Session.route) { inclusive = true }
                 }
             }
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                if (maxWidth >= TABLET_MIN_WIDTH) {
+                    TabletSessionFlowScreen(viewModel = viewModel, onSettingsClick = onSettingsClick, onFinish = onFinish)
+                } else {
+                    SessionFlowScreen(viewModel = viewModel, onSettingsClick = onSettingsClick, onFinish = onFinish)
+                }
+            }
+        }
+
+        composable(Screen.Settings.route) {
+            SettingsScreen(onBack = { navController.popBackStack() })
         }
 
         composable(Screen.CardDeck.route) {

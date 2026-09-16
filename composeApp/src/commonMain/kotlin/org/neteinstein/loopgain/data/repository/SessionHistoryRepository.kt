@@ -20,6 +20,14 @@ interface SessionHistoryRepository {
     fun recentlyUsedCardIds(maxSessions: Int = 12): Set<String>
 
     fun nextSessionNumber(): Int
+
+    /**
+     * Clears logged sessions, so every card becomes drawable again immediately. There is no
+     * partial "un-hide just this card" — held-back status is derived entirely from recent draws,
+     * so the only way to re-enable one is to forget the sessions that drew it, which forgets them
+     * all. Settings surfaces this plainly rather than pretending it's more granular.
+     */
+    fun clearAll()
 }
 
 class InMemorySessionHistoryRepository : SessionHistoryRepository {
@@ -35,4 +43,8 @@ class InMemorySessionHistoryRepository : SessionHistoryRepository {
         entries.take(maxSessions).flatMap { it.drawnCardIds }.toSet()
 
     override fun nextSessionNumber(): Int = entries.size + 1
+
+    override fun clearAll() {
+        entries.clear()
+    }
 }

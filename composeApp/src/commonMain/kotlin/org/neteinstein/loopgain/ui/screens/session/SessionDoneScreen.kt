@@ -24,13 +24,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.ui.theme.CardStyles
-import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
+import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
 import org.neteinstein.loopgain.ui.viewmodel.SessionUiState
 
 @Composable
 fun SessionDoneScreen(
     state: SessionUiState,
-    onNewSession: () -> Unit,
+    onFinish: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -40,10 +41,10 @@ fun SessionDoneScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(18.dp),
         ) {
-            Text(text = "Session logged", color = SessionPalette.Ink, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Text(text = SessionCopy.sessionLoggedTitle(state.language), color = LocalSessionColors.current.Ink, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Text(
                 text = state.doneSummary,
-                color = SessionPalette.MutedLabel,
+                color = LocalSessionColors.current.MutedLabel,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(top = 4.dp, bottom = 15.dp),
             )
@@ -53,14 +54,14 @@ fun SessionDoneScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(1.dp, SessionPalette.Border)
+                            .border(1.dp, LocalSessionColors.current.Border)
                             .padding(horizontal = 11.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         Box(modifier = Modifier.width(3.dp).height(24.dp).background(swatch))
-                        Text(text = card.code, color = SessionPalette.MutedLabel, fontSize = 10.sp, modifier = Modifier.width(38.dp))
-                        Text(text = card.text, color = SessionPalette.Ink, fontSize = 12.sp, modifier = Modifier.weight(1f))
+                        Text(text = card.code, color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp, modifier = Modifier.width(38.dp))
+                        Text(text = card.text, color = LocalSessionColors.current.Ink, fontSize = 12.sp, modifier = Modifier.weight(1f))
                     }
                 }
             }
@@ -68,28 +69,28 @@ fun SessionDoneScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp)
-                    .border(1.dp, SessionPalette.Border)
+                    .border(1.dp, LocalSessionColors.current.Border)
                     .padding(13.dp),
             ) {
-                Text(text = "HELD BACK NEXT TIME", color = SessionPalette.MutedLabel, fontSize = 10.sp, letterSpacing = 1.6.sp)
+                Text(text = SessionCopy.heldBackNextTime(state.language), color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp, letterSpacing = 1.6.sp)
                 Text(
                     text = state.heldBackNote,
-                    color = SessionPalette.Accent,
+                    color = LocalSessionColors.current.Accent,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 8.dp),
                 )
             }
         }
         Button(
-            onClick = onNewSession,
+            onClick = onFinish,
             shape = RoundedCornerShape(4.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = SessionPalette.Accent, contentColor = SessionPalette.OnAccent),
+            colors = ButtonDefaults.buttonColors(containerColor = LocalSessionColors.current.Accent, contentColor = LocalSessionColors.current.OnAccent),
             modifier = Modifier
                 .fillMaxWidth()
-                .background(SessionPalette.PanelBackground)
+                .background(LocalSessionColors.current.PanelBackground)
                 .padding(16.dp),
         ) {
-            Text(text = "NEW SESSION", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.4.sp)
+            Text(text = SessionCopy.finishButton(state.language), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.4.sp)
         }
     }
 }

@@ -1,6 +1,8 @@
 package org.neteinstein.loopgain.ui.screens.session.tablet
 
+import org.neteinstein.loopgain.domain.model.Language
 import org.neteinstein.loopgain.domain.model.SessionStage
+import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
 
 /**
  * The six steps shown in the tablet's progress bar. Unlike the phone, the tablet has no dedicated
@@ -16,7 +18,7 @@ val TABLET_STEP_STAGES: List<SessionStage> = listOf(
     SessionStage.DONE,
 )
 
-val TABLET_STEP_LABELS: List<String> = listOf("SETUP", "DRAW", "WRITE", "ROUNDS", "CLOSE", "LOGGED")
+fun tabletStepLabels(language: Language): List<String> = TABLET_STEP_STAGES.map { SessionCopy.stageLabel(it, language) }
 
 /**
  * Index of [stage] within [TABLET_STEP_STAGES], clamped to a safe default of 0 for a stage the

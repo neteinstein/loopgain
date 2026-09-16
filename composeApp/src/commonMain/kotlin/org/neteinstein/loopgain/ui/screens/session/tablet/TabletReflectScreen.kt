@@ -25,7 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.domain.model.SessionStage
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
+import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
 import org.neteinstein.loopgain.ui.viewmodel.SessionUiState
 
 /** Step 5: the closing reflection, centred, matching the design's single-column layout. */
@@ -44,18 +46,18 @@ fun TabletReflectScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(text = "CLOSING", color = SessionPalette.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
+            Text(text = SessionCopy.stageLabel(SessionStage.REFLECT, state.language), color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
             Text(
-                text = "How did that feel?",
-                color = SessionPalette.Ink,
+                text = SessionCopy.howDidThatFeel(state.language),
+                color = LocalSessionColors.current.Ink,
                 fontSize = 46.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
             )
             Text(
-                text = "Say it out loud first. Then one line for the record — about the session, not about anyone in it.",
-                color = SessionPalette.Accent,
+                text = SessionCopy.sayItOutLoud(state.language),
+                color = LocalSessionColors.current.Accent,
                 fontSize = 15.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.widthIn(max = 520.dp).padding(bottom = 20.dp),
@@ -63,12 +65,12 @@ fun TabletReflectScreen(
             BasicTextField(
                 value = state.reflection,
                 onValueChange = onReflectionChange,
-                textStyle = TextStyle(color = SessionPalette.Ink, fontSize = 17.sp, textAlign = TextAlign.Center),
+                textStyle = TextStyle(color = LocalSessionColors.current.Ink, fontSize = 17.sp, textAlign = TextAlign.Center),
                 modifier = Modifier
                     .widthIn(max = 620.dp)
                     .fillMaxWidth()
-                    .border(1.dp, SessionPalette.Accent)
-                    .background(androidx.compose.ui.graphics.Color.White)
+                    .border(1.dp, LocalSessionColors.current.Accent)
+                    .background(LocalSessionColors.current.Background)
                     .padding(18.dp),
             )
             FlowRow(
@@ -78,18 +80,18 @@ fun TabletReflectScreen(
                 state.quickReflections.forEach { quick ->
                     Text(
                         text = quick,
-                        color = SessionPalette.Accent,
+                        color = LocalSessionColors.current.Accent,
                         fontSize = 13.sp,
                         modifier = Modifier
-                            .border(1.dp, SessionPalette.Border)
+                            .border(1.dp, LocalSessionColors.current.Border)
                             .clickable { onQuickPick(quick) }
                             .padding(horizontal = 14.dp, vertical = 12.dp),
                     )
                 }
             }
             Text(
-                text = "Saved with the session: four card codes, the date, the length, this line.",
-                color = SessionPalette.MutedLabel,
+                text = SessionCopy.savedWithSession(state.language),
+                color = LocalSessionColors.current.MutedLabel,
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.widthIn(max = 480.dp).padding(top = 14.dp),
@@ -98,18 +100,18 @@ fun TabletReflectScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(SessionPalette.PanelBackground)
+                .background(LocalSessionColors.current.PanelBackground)
                 .padding(horizontal = 30.dp, vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = state.orderFootLabel, color = SessionPalette.MutedLabel, fontSize = 13.sp)
+            Text(text = state.orderFootLabel, color = LocalSessionColors.current.MutedLabel, fontSize = 13.sp)
             Button(
                 onClick = onLog,
                 shape = RoundedCornerShape(4.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = SessionPalette.Accent, contentColor = SessionPalette.OnAccent),
+                colors = ButtonDefaults.buttonColors(containerColor = LocalSessionColors.current.Accent, contentColor = LocalSessionColors.current.OnAccent),
             ) {
-                Text(text = "LOG SESSION", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.6.sp)
+                Text(text = SessionCopy.logSessionButton(state.language), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.6.sp)
             }
         }
     }

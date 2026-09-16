@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.domain.model.CardLevel
 import org.neteinstein.loopgain.ui.theme.CardStyles
-import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
 import org.neteinstein.loopgain.ui.viewmodel.CategoryDepthUi
 
 /**
@@ -34,7 +34,7 @@ fun DepthPickerTile(
     val swatch = CardStyles.forCategory(depth.category).containerColor
     Column(
         modifier = modifier
-            .border(1.dp, SessionPalette.Border)
+            .border(1.dp, LocalSessionColors.current.Border)
             .padding(8.dp),
     ) {
         androidx.compose.foundation.layout.Box(
@@ -45,7 +45,7 @@ fun DepthPickerTile(
         )
         Text(
             text = depth.label.uppercase(),
-            color = SessionPalette.Ink,
+            color = LocalSessionColors.current.Ink,
             fontSize = 10.sp,
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 0.6.sp,
@@ -61,20 +61,20 @@ fun DepthPickerTile(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(1.dp, if (selected) swatch else SessionPalette.Border)
-                            .background(if (selected) SessionPalette.PanelBackground else Color.Transparent)
+                            .border(1.dp, if (selected) swatch else LocalSessionColors.current.Border)
+                            .background(if (selected) LocalSessionColors.current.PanelBackground else Color.Transparent)
                             .clickable { onPick(level) }
                             .padding(vertical = 6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        LevelDots(level = level, activeColor = swatch, inactiveColor = SessionPalette.Disabled)
+                        LevelDots(level = level, activeColor = swatch, inactiveColor = LocalSessionColors.current.Disabled)
                     }
                 }
             }
         } else {
             Text(
                 text = "—",
-                color = SessionPalette.MutedSecondary,
+                color = LocalSessionColors.current.MutedSecondary,
                 fontSize = 11.sp,
                 modifier = Modifier.padding(top = 12.dp),
             )

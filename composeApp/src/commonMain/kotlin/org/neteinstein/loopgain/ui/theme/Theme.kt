@@ -1,10 +1,21 @@
 package org.neteinstein.loopgain.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import org.neteinstein.loopgain.domain.model.AppTheme
+
+/**
+ * Whether the resolved theme is currently dark — read by session-flow screens to pick between
+ * [SessionPalette] and [SessionPaletteDark], independent of Material's own colour roles (those
+ * screens deliberately don't use `MaterialTheme.colorScheme`; see [SessionPalette]).
+ */
+val LocalIsDarkTheme = staticCompositionLocalOf { false }
 
 // LoopGain brand colors - based on the official theme specification
 // Primary, Secondary, and Background colors
@@ -41,6 +52,8 @@ private val LightColorScheme = lightColorScheme(
     onTertiary = Color.White,
     onBackground = NavyBlue,
     onSurface = NavyBlue,
+    onSurfaceVariant = Color(0xFF5C7794),
+    outline = Color(0xFFB7C6D6),
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -54,21 +67,31 @@ private val DarkColorScheme = darkColorScheme(
     onTertiary = Color.White,
     onBackground = Color(0xFFE6E1E5),
     onSurface = Color(0xFFE6E1E5),
+    onSurfaceVariant = Color(0xFFA8B8C9),
+    outline = Color(0xFF49525C),
 )
 
+/** Resolves [AppTheme.SYSTEM] against the platform's current setting; [LIGHT]/[DARK] are explicit. */
 @Composable
 fun LoopGainTheme(
-    darkTheme: Boolean = false,
+    theme: AppTheme = AppTheme.SYSTEM,
     content: @Composable () -> Unit
 ) {
+    val darkTheme = when (theme) {
+        AppTheme.LIGHT -> false
+        AppTheme.DARK -> true
+        AppTheme.SYSTEM -> isSystemInDarkTheme()
+    }
     val colorScheme = if (darkTheme) {
         DarkColorScheme
     } else {
         LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        content = content
-    )
+    CompositionLocalProvider(LocalIsDarkTheme provides darkTheme) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            content = content
+        )
+    }
 }

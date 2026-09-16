@@ -22,7 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -31,8 +30,9 @@ import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.domain.model.CardCategory
 import org.neteinstein.loopgain.domain.model.CardLevel
 import org.neteinstein.loopgain.ui.components.DepthPickerTile
-import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
 import org.neteinstein.loopgain.ui.viewmodel.PersonRowUi
+import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
 import org.neteinstein.loopgain.ui.viewmodel.SessionUiState
 
 /**
@@ -55,20 +55,20 @@ fun TabletSetupScreen(
             modifier = Modifier
                 .weight(1.15f)
                 .fillMaxHeight()
-                .border(width = 1.dp, color = SessionPalette.Border)
+                .border(width = 1.dp, color = LocalSessionColors.current.Border)
                 .padding(30.dp),
         ) {
-            Text(text = "STEP 1 — SETUP", color = SessionPalette.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
+            Text(text = SessionCopy.stepOneSetup(state.language), color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
             Text(
-                text = "Who is at the table?",
-                color = SessionPalette.Ink,
+                text = SessionCopy.setupTitle(state.language),
+                color = LocalSessionColors.current.Ink,
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 6.dp, bottom = 4.dp),
             )
             Text(
-                text = "Type each name. The list is the order feedback goes round.",
-                color = SessionPalette.MutedLabel,
+                text = SessionCopy.setupSubtitle(state.language),
+                color = LocalSessionColors.current.MutedLabel,
                 fontSize = 13.sp,
                 modifier = Modifier.padding(bottom = 18.dp),
             )
@@ -90,22 +90,22 @@ fun TabletSetupScreen(
                     }
                 }
                 Text(
-                    text = "+ ADD PERSON",
-                    color = SessionPalette.Accent,
+                    text = SessionCopy.addPerson(state.language),
+                    color = LocalSessionColors.current.Accent,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 1.2.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.dp, SessionPalette.Accent, RoundedCornerShape(4.dp))
+                        .border(1.dp, LocalSessionColors.current.Accent, RoundedCornerShape(4.dp))
                         .clickable(onClick = onAddPerson)
                         .padding(vertical = 15.dp),
                 )
 
                 Text(
-                    text = "DEPTH, PER CATEGORY",
-                    color = SessionPalette.MutedLabel,
+                    text = SessionCopy.depthPerCategory(state.language),
+                    color = LocalSessionColors.current.MutedLabel,
                     fontSize = 10.sp,
                     letterSpacing = 1.8.sp,
                     modifier = Modifier.padding(top = 26.dp, bottom = 11.dp),
@@ -126,33 +126,33 @@ fun TabletSetupScreen(
             modifier = Modifier
                 .weight(0.85f)
                 .fillMaxHeight()
-                .background(SessionPalette.PanelBackground)
+                .background(LocalSessionColors.current.PanelBackground)
                 .padding(30.dp),
         ) {
             Text(
-                text = "SESSION CLOCK — CALCULATED",
-                color = SessionPalette.MutedLabel,
+                text = SessionCopy.sessionClockCalculated(state.language),
+                color = LocalSessionColors.current.MutedLabel,
                 fontSize = 10.sp,
                 letterSpacing = 2.sp,
                 modifier = Modifier.padding(bottom = 18.dp),
             )
-            Text(text = state.mathLine, color = SessionPalette.Accent, fontSize = 14.sp)
+            Text(text = state.mathLine, color = LocalSessionColors.current.Accent, fontSize = 14.sp)
             androidx.compose.foundation.layout.Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 14.dp)
                     .height(1.dp)
-                    .background(SessionPalette.Border),
+                    .background(LocalSessionColors.current.Border),
             )
             Text(
                 text = state.totalLabel,
-                color = SessionPalette.Ink,
+                color = LocalSessionColors.current.Ink,
                 fontSize = 88.sp,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "Stays visible to the whole room. A cue fires at five minutes left.",
-                color = SessionPalette.MutedLabel,
+                text = SessionCopy.stayVisibleCue(state.language),
+                color = LocalSessionColors.current.MutedLabel,
                 fontSize = 13.sp,
                 modifier = Modifier.padding(top = 6.dp, bottom = 18.dp),
             )
@@ -160,20 +160,20 @@ fun TabletSetupScreen(
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
                 Text(
                     text = state.heldBackNote,
-                    color = SessionPalette.Accent,
+                    color = LocalSessionColors.current.Accent,
                     fontSize = 12.sp,
                     lineHeight = 17.sp,
-                    modifier = Modifier.fillMaxWidth().border(1.dp, SessionPalette.Border).padding(14.dp),
+                    modifier = Modifier.fillMaxWidth().border(1.dp, LocalSessionColors.current.Border).padding(14.dp),
                 )
                 Text(
-                    text = "No answers are stored. Only which cards were drawn, and one session-level note.",
-                    color = SessionPalette.Accent,
+                    text = SessionCopy.noAnswersStored(state.language),
+                    color = LocalSessionColors.current.Accent,
                     fontSize = 12.sp,
                     lineHeight = 17.sp,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 9.dp)
-                        .border(1.dp, SessionPalette.Border)
+                        .border(1.dp, LocalSessionColors.current.Border)
                         .padding(14.dp),
                 )
                 Button(
@@ -181,10 +181,10 @@ fun TabletSetupScreen(
                     enabled = state.canStart,
                     shape = RoundedCornerShape(4.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = SessionPalette.Accent,
-                        contentColor = SessionPalette.OnAccent,
-                        disabledContainerColor = SessionPalette.Disabled,
-                        disabledContentColor = SessionPalette.DisabledText,
+                        containerColor = LocalSessionColors.current.Accent,
+                        contentColor = LocalSessionColors.current.OnAccent,
+                        disabledContainerColor = LocalSessionColors.current.Disabled,
+                        disabledContentColor = LocalSessionColors.current.DisabledText,
                     ),
                     modifier = Modifier.fillMaxWidth().padding(top = 9.dp),
                 ) {
@@ -204,13 +204,13 @@ private fun TabletPersonRow(
 ) {
     Row(
         modifier = modifier
-            .border(1.dp, SessionPalette.Border)
-            .background(Color.White),
+            .border(1.dp, LocalSessionColors.current.Border)
+            .background(LocalSessionColors.current.Background),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = "${person.index}",
-            color = SessionPalette.MutedLabel,
+            color = LocalSessionColors.current.MutedLabel,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,
@@ -219,12 +219,12 @@ private fun TabletPersonRow(
         BasicTextField(
             value = person.name,
             onValueChange = onNameChange,
-            textStyle = TextStyle(color = SessionPalette.Ink, fontSize = 16.sp),
+            textStyle = TextStyle(color = LocalSessionColors.current.Ink, fontSize = 16.sp),
             modifier = Modifier.weight(1f).padding(vertical = 15.dp),
         )
         Text(
             text = "×",
-            color = SessionPalette.MutedSecondary,
+            color = LocalSessionColors.current.MutedSecondary,
             fontSize = 18.sp,
             modifier = Modifier.clickable(onClick = onRemove).padding(7.dp),
         )

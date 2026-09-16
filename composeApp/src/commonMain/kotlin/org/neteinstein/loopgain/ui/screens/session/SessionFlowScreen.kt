@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -14,18 +15,12 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.neteinstein.loopgain.domain.model.SessionStage
 import org.neteinstein.loopgain.ui.components.HintBanner
 import org.neteinstein.loopgain.ui.components.SessionHeader
+import org.neteinstein.loopgain.ui.theme.LocalIsDarkTheme
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
 import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.theme.SessionPaletteDark
+import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
 import org.neteinstein.loopgain.ui.viewmodel.SessionViewModel
-
-private fun stageLabel(stage: SessionStage): String = when (stage) {
-    SessionStage.SETUP -> "SETUP"
-    SessionStage.DRAW -> "DRAW"
-    SessionStage.READ -> "READ ALOUD"
-    SessionStage.WRITE -> "WRITE"
-    SessionStage.ROUNDS -> "ROUNDS"
-    SessionStage.REFLECT -> "CLOSING"
-    SessionStage.DONE -> "LOGGED"
-}
 
 /**
  * The phone's "Faithful deck" flow (design 1A): one screen per [SessionStage], sharing a single
@@ -34,60 +29,73 @@ private fun stageLabel(stage: SessionStage): String = when (stage) {
  * the same view model with its own composables instead of this dispatcher.
  */
 @Composable
-fun SessionFlowScreen(viewModel: SessionViewModel = koinViewModel(), modifier: Modifier = Modifier) {
+fun SessionFlowScreen(
+    viewModel: SessionViewModel = koinViewModel(),
+    onSettingsClick: () -> Unit = {},
+    onFinish: () -> Unit = viewModel::resetSession,
+    modifier: Modifier = Modifier,
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val colors = if (LocalIsDarkTheme.current) SessionPaletteDark else SessionPalette
 
-    Column(modifier = modifier.fillMaxSize().background(SessionPalette.Background)) {
-        SessionHeader(stageLabel = stageLabel(state.stage), clock = state.sessionClock, running = state.sessionRunning)
-        state.hint?.let { hint ->
-            HintBanner(text = hint, onDismiss = viewModel::dismissHint)
-        }
-        Column(modifier = Modifier.weight(1f).windowInsetsPadding(WindowInsets.navigationBars)) {
-            when (state.stage) {
-                SessionStage.SETUP -> SessionSetupScreen(
-                    state = state,
-                    onAddPerson = viewModel::addPerson,
-                    onRemovePerson = viewModel::removePerson,
-                    onRenamePerson = viewModel::renamePerson,
-                    onPickLevel = viewModel::setLevel,
-                    onStart = viewModel::startSession,
-                )
+    CompositionLocalProvider(LocalSessionColors provides colors) {
+        Column(modifier = modifier.fillMaxSize().background(LocalSessionColors.current.Background)) {
+            SessionHeader(
+                stageLabel = SessionCopy.stageLabel(state.stage, state.language),
+                clock = state.sessionClock,
+                running = state.sessionRunning,
+                onSettingsClick = onSettingsClick,
+            )
+            state.hint?.let { hint ->
+                HintBanner(text = hint, onDismiss = viewModel::dismissHint)
+            }
+            Column(modifier = Modifier.weight(1f).windowInsetsPadding(WindowInsets.navigationBars)) {
+                when (state.stage) {
+                    SessionStage.SETUP -> SessionSetupScreen(
+                        state = state,
+                        onAddPerson = viewModel::addPerson,
+                        onRemovePerson = viewModel::removePerson,
+                        onRenamePerson = viewModel::renamePerson,
+                        onPickLevel = viewModel::setLevel,
+                        onStart = viewModel::startSession,
+                    )
 
-                SessionStage.DRAW -> SessionDrawScreen(
-                    state = state,
-                    onTapPile = viewModel::drawOne,
-                    onRedraw = viewModel::redrawAll,
-                    onRead = viewModel::enterRead,
-                )
+                    SessionStage.DRAW -> SessionDrawScreen(
+                        state = state,
+                        onTapPile = viewModel::drawOne,
+                        onRedraw = viewModel::redrawAll,
+                        onRead = viewModel::enterRead,
+                    )
 
-                SessionStage.READ -> SessionReadScreen(
-                    state = state,
-                    onPrevious = viewModel::previousReadCard,
-                    onNext = viewModel::advanceRead,
-                )
+                    SessionStage.READ -> SessionReadScreen(
+                        state = state,
+                        onPrevious = viewModel::previousReadCard,
+                        onNext = viewModel::advanceRead,
+                    )
 
-                SessionStage.WRITE -> SessionWriteScreen(
-                    state = state,
-                    onDone = viewModel::startRounds,
-                )
+                    SessionStage.WRITE -> SessionWriteScreen(
+                        state = state,
+                        onDone = viewModel::startRounds,
+                    )
 
-                SessionStage.ROUNDS -> SessionRoundsScreen(
-                    state = state,
-                    onSkip = viewModel::skipToReflect,
-                    onAdvance = viewModel::advanceRounds,
-                )
+                    SessionStage.ROUNDS -> SessionRoundsScreen(
+                        state = state,
+                        onSkip = viewModel::skipToReflect,
+                        onAdvance = viewModel::advanceRounds,
+                    )
 
-                SessionStage.REFLECT -> SessionReflectScreen(
-                    state = state,
-                    onReflectionChange = viewModel::setReflection,
-                    onQuickPick = viewModel::setReflection,
-                    onLog = viewModel::logSession,
-                )
+                    SessionStage.REFLECT -> SessionReflectScreen(
+                        state = state,
+                        onReflectionChange = viewModel::setReflection,
+                        onQuickPick = viewModel::setReflection,
+                        onLog = viewModel::logSession,
+                    )
 
-                SessionStage.DONE -> SessionDoneScreen(
-                    state = state,
-                    onNewSession = viewModel::resetSession,
-                )
+                    SessionStage.DONE -> SessionDoneScreen(
+                        state = state,
+                        onFinish = onFinish,
+                    )
+                }
             }
         }
     }

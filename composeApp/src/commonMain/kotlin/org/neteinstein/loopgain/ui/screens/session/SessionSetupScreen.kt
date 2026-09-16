@@ -24,15 +24,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.domain.model.CardLevel
 import org.neteinstein.loopgain.ui.components.DepthPickerTile
-import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
 import org.neteinstein.loopgain.ui.viewmodel.PersonRowUi
+import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
 import org.neteinstein.loopgain.ui.viewmodel.SessionUiState
 
 @Composable
@@ -53,14 +53,14 @@ fun SessionSetupScreen(
                 .padding(16.dp),
         ) {
             Text(
-                text = "Who is at the table?",
-                color = SessionPalette.Ink,
+                text = SessionCopy.setupTitle(state.language),
+                color = LocalSessionColors.current.Ink,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "Type each name. The list is the order feedback goes round.",
-                color = SessionPalette.MutedLabel,
+                text = SessionCopy.setupSubtitle(state.language),
+                color = LocalSessionColors.current.MutedLabel,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(top = 4.dp, bottom = 14.dp),
             )
@@ -76,8 +76,8 @@ fun SessionSetupScreen(
             }
 
             Text(
-                text = "+ ADD PERSON",
-                color = SessionPalette.Accent,
+                text = SessionCopy.addPerson(state.language),
+                color = LocalSessionColors.current.Accent,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 1.sp,
@@ -85,14 +85,14 @@ fun SessionSetupScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 10.dp)
-                    .border(1.dp, SessionPalette.Accent, RoundedCornerShape(4.dp))
+                    .border(1.dp, LocalSessionColors.current.Accent, RoundedCornerShape(4.dp))
                     .clickable(onClick = onAddPerson)
                     .padding(vertical = 13.dp),
             )
 
             Text(
-                text = "DEPTH, PER CATEGORY",
-                color = SessionPalette.MutedLabel,
+                text = SessionCopy.depthPerCategory(state.language),
+                color = LocalSessionColors.current.MutedLabel,
                 fontSize = 10.sp,
                 letterSpacing = 1.6.sp,
                 modifier = Modifier.padding(top = 20.dp, bottom = 9.dp),
@@ -112,7 +112,7 @@ fun SessionSetupScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(SessionPalette.PanelBackground)
+                .background(LocalSessionColors.current.PanelBackground)
                 .padding(16.dp),
         ) {
             Row(
@@ -120,18 +120,18 @@ fun SessionSetupScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom,
             ) {
-                Text(text = state.mathLine, color = SessionPalette.MutedLabel, fontSize = 12.sp)
-                Text(text = state.totalLabel, color = SessionPalette.Ink, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+                Text(text = state.mathLine, color = LocalSessionColors.current.MutedLabel, fontSize = 12.sp)
+                Text(text = state.totalLabel, color = LocalSessionColors.current.Ink, fontSize = 26.sp, fontWeight = FontWeight.Bold)
             }
             Button(
                 onClick = onStart,
                 enabled = state.canStart,
                 shape = RoundedCornerShape(4.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = SessionPalette.Accent,
-                    contentColor = SessionPalette.OnAccent,
-                    disabledContainerColor = SessionPalette.Disabled,
-                    disabledContentColor = SessionPalette.DisabledText,
+                    containerColor = LocalSessionColors.current.Accent,
+                    contentColor = LocalSessionColors.current.OnAccent,
+                    disabledContainerColor = LocalSessionColors.current.Disabled,
+                    disabledContentColor = LocalSessionColors.current.DisabledText,
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -148,13 +148,13 @@ private fun PersonRow(person: PersonRowUi, onNameChange: (String) -> Unit, onRem
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, SessionPalette.Border)
-            .background(Color.White),
+            .border(1.dp, LocalSessionColors.current.Border)
+            .background(LocalSessionColors.current.Background),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = "${person.index}",
-            color = SessionPalette.MutedLabel,
+            color = LocalSessionColors.current.MutedLabel,
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,
@@ -165,14 +165,14 @@ private fun PersonRow(person: PersonRowUi, onNameChange: (String) -> Unit, onRem
         BasicTextField(
             value = person.name,
             onValueChange = onNameChange,
-            textStyle = androidx.compose.ui.text.TextStyle(color = SessionPalette.Ink, fontSize = 15.sp),
+            textStyle = androidx.compose.ui.text.TextStyle(color = LocalSessionColors.current.Ink, fontSize = 15.sp),
             modifier = Modifier
                 .weight(1f)
                 .padding(vertical = 13.dp),
         )
         Text(
             text = "×",
-            color = SessionPalette.MutedSecondary,
+            color = LocalSessionColors.current.MutedSecondary,
             fontSize = 17.sp,
             modifier = Modifier
                 .clickable(onClick = onRemove)

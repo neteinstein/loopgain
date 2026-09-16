@@ -16,8 +16,8 @@ enum class CardCategory(
     PERSONAL_QUESTION("Personal Question", "Pergunta Pessoal", "Q");
 
     fun displayName(language: Language): String = when (language) {
-        Language.EN -> displayNameEn
         Language.PT -> displayNamePt
+        Language.EN, Language.ES, Language.FR -> displayNameEn
     }
 
     companion object {

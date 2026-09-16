@@ -24,6 +24,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,7 +44,10 @@ import org.neteinstein.loopgain.domain.model.SessionStage
 import org.neteinstein.loopgain.ui.components.HintBanner
 import org.neteinstein.loopgain.ui.components.LevelDots
 import org.neteinstein.loopgain.ui.theme.CardStyles
+import org.neteinstein.loopgain.ui.theme.LocalIsDarkTheme
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
 import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.theme.SessionPaletteDark
 import org.neteinstein.loopgain.ui.theme.TitleRed
 import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
 import org.neteinstein.loopgain.ui.viewmodel.SessionUiState
@@ -69,7 +73,12 @@ import org.neteinstein.loopgain.ui.viewmodel.toHistoryUiState
  *   "Ownership & handover" — see [org.neteinstein.loopgain.ui.viewmodel.toHistoryUiState].
  */
 @Composable
-fun TabletSessionFlowScreen(viewModel: SessionViewModel = koinViewModel(), modifier: Modifier = Modifier) {
+fun TabletSessionFlowScreen(
+    viewModel: SessionViewModel = koinViewModel(),
+    onSettingsClick: () -> Unit = {},
+    onFinish: () -> Unit = viewModel::resetSession,
+    modifier: Modifier = Modifier,
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showHistory by remember { mutableStateOf(false) }
     var revealCategory by remember { mutableStateOf<CardCategory?>(null) }
@@ -79,23 +88,27 @@ fun TabletSessionFlowScreen(viewModel: SessionViewModel = koinViewModel(), modif
     }
 
     val namedCount = state.people.count { it.name.isNotBlank() }
+    val colors = if (LocalIsDarkTheme.current) SessionPaletteDark else SessionPalette
 
-    Box(modifier = modifier.fillMaxSize().background(SessionPalette.Background)) {
+    CompositionLocalProvider(LocalSessionColors provides colors) {
+    Box(modifier = modifier.fillMaxSize().background(LocalSessionColors.current.Background)) {
         Column(modifier = Modifier.fillMaxSize()) {
             TabletHeader(
                 headerMeta = when {
-                    showHistory -> "SESSION LOG · TEAM LEVEL ONLY"
-                    state.stage == SessionStage.SETUP -> "SETUP"
-                    else -> "SESSION ${viewModel.nextSessionNumber()} · $namedCount PEOPLE"
+                    showHistory -> SessionCopy.sessionLogHeaderMeta(state.language)
+                    state.stage == SessionStage.SETUP -> SessionCopy.stageLabel(SessionStage.SETUP, state.language)
+                    else -> SessionCopy.sessionNumberHeaderMeta(viewModel.nextSessionNumber(), namedCount, state.language)
                 },
                 clock = state.sessionClock,
+                clockSuffix = SessionCopy.leftLabel(state.language),
                 showClock = state.sessionRunning && !showHistory,
-                historyLabel = if (showHistory) "CLOSE" else "HISTORY",
+                historyLabel = SessionCopy.historyToggleLabel(showHistory, state.language),
                 onToggleHistory = { showHistory = !showHistory },
+                onSettingsClick = onSettingsClick,
             )
 
             if (!showHistory) {
-                TabletStepTabs(currentStage = state.stage)
+                TabletStepTabs(currentStage = state.stage, language = state.language)
                 state.hint?.let { hint ->
                     HintBanner(text = hint, onDismiss = viewModel::dismissHint)
                 }
@@ -113,6 +126,7 @@ fun TabletSessionFlowScreen(viewModel: SessionViewModel = koinViewModel(), modif
                         viewModel = viewModel,
                         revealCategory = revealCategory,
                         onOpenReveal = { category -> revealCategory = category },
+                        onFinish = onFinish,
                     )
                 }
             }
@@ -130,6 +144,7 @@ fun TabletSessionFlowScreen(viewModel: SessionViewModel = koinViewModel(), modif
             }
         }
     }
+    }
 }
 
 @Composable
@@ -138,6 +153,7 @@ private fun TabletStageContent(
     viewModel: SessionViewModel,
     revealCategory: CardCategory?,
     onOpenReveal: (CardCategory) -> Unit,
+    onFinish: () -> Unit,
 ) {
     when (state.stage) {
         SessionStage.SETUP -> TabletSetupScreen(
@@ -175,7 +191,7 @@ private fun TabletStageContent(
             onLog = viewModel::logSession,
         )
 
-        SessionStage.DONE -> TabletDoneScreen(state = state, onNewSession = viewModel::resetSession)
+        SessionStage.DONE -> TabletDoneScreen(state = state, onFinish = onFinish)
 
         // The tablet never enters READ — startWriteDirectly() skips it — but the `when` must stay
         // exhaustive against SessionStage, which is shared with the phone flow.
@@ -187,15 +203,17 @@ private fun TabletStageContent(
 private fun TabletHeader(
     headerMeta: String,
     clock: String,
+    clockSuffix: String,
     showClock: Boolean,
     historyLabel: String,
     onToggleHistory: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .border(width = 1.dp, color = SessionPalette.Border)
+            .border(width = 1.dp, color = LocalSessionColors.current.Border)
             .windowInsetsPadding(WindowInsets.statusBars)
             .padding(horizontal = 26.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -209,27 +227,30 @@ private fun TabletHeader(
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 1.5.sp,
             )
-            Box(modifier = Modifier.width(1.dp).height(16.dp).background(SessionPalette.Border))
-            Text(text = headerMeta, color = SessionPalette.MutedLabel, fontSize = 10.sp, letterSpacing = 1.6.sp)
+            Box(modifier = Modifier.width(1.dp).height(16.dp).background(LocalSessionColors.current.Border))
+            Text(text = headerMeta, color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp, letterSpacing = 1.6.sp)
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             if (showClock) {
                 Row(
-                    modifier = Modifier.border(1.dp, SessionPalette.Accent).padding(horizontal = 13.dp, vertical = 8.dp),
+                    modifier = Modifier.border(1.dp, LocalSessionColors.current.Accent).padding(horizontal = 13.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(9.dp),
                 ) {
-                    Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(SessionPalette.AccentBright))
-                    Text(text = clock, color = SessionPalette.Ink, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
-                    Text(text = "LEFT", color = SessionPalette.MutedLabel, fontSize = 9.sp, letterSpacing = 1.6.sp)
+                    Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(LocalSessionColors.current.AccentBright))
+                    Text(text = clock, color = LocalSessionColors.current.Ink, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+                    Text(text = clockSuffix, color = LocalSessionColors.current.MutedLabel, fontSize = 9.sp, letterSpacing = 1.6.sp)
                 }
             }
             OutlinedButton(
                 onClick = onToggleHistory,
                 shape = RoundedCornerShape(4.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = SessionPalette.Accent),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = LocalSessionColors.current.Accent),
             ) {
                 Text(text = historyLabel, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp)
+            }
+            androidx.compose.material3.IconButton(onClick = onSettingsClick) {
+                Text(text = "⚙", color = LocalSessionColors.current.MutedLabel, fontSize = 22.sp)
             }
         }
     }
@@ -240,32 +261,32 @@ private fun TabletHeader(
  * copy" note on [TabletSessionFlowScreen] for why this does not jump stages on tap.
  */
 @Composable
-private fun TabletStepTabs(currentStage: SessionStage, modifier: Modifier = Modifier) {
+private fun TabletStepTabs(currentStage: SessionStage, language: org.neteinstein.loopgain.domain.model.Language, modifier: Modifier = Modifier) {
     val currentIndex = tabletStepIndex(currentStage)
     Row(modifier = modifier.fillMaxWidth()) {
-        TABLET_STEP_LABELS.forEachIndexed { index, label ->
+        tabletStepLabels(language).forEachIndexed { index, label ->
             val isCurrent = index == currentIndex
             val isDone = index < currentIndex
             Row(
                 modifier = Modifier
                     .weight(1f)
-                    .border(width = 1.dp, color = SessionPalette.Border)
-                    .background(if (isCurrent) SessionPalette.Ink else Color.Transparent)
+                    .border(width = 1.dp, color = LocalSessionColors.current.Border)
+                    .background(if (isCurrent) LocalSessionColors.current.Ink else Color.Transparent)
                     .padding(horizontal = 14.dp, vertical = 13.dp),
                 horizontalArrangement = Arrangement.spacedBy(9.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = (index + 1).toString().padStart(2, '0'),
-                    color = if (isCurrent) SessionPalette.AccentBright else SessionPalette.MutedSecondary,
+                    color = if (isCurrent) LocalSessionColors.current.AccentBright else LocalSessionColors.current.MutedSecondary,
                     fontSize = 10.sp,
                 )
                 Text(
                     text = label,
                     color = when {
-                        isCurrent -> SessionPalette.Background
-                        isDone -> SessionPalette.Accent
-                        else -> SessionPalette.MutedSecondary
+                        isCurrent -> LocalSessionColors.current.Background
+                        isDone -> LocalSessionColors.current.Accent
+                        else -> LocalSessionColors.current.MutedSecondary
                     },
                     fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -305,8 +326,8 @@ private fun TabletRevealOverlay(
             modifier = Modifier
                 .widthIn(max = 760.dp)
                 .fillMaxWidth()
-                .border(1.dp, SessionPalette.AccentBright)
-                .background(SessionPalette.Background)
+                .border(1.dp, LocalSessionColors.current.AccentBright)
+                .background(LocalSessionColors.current.Background)
                 .padding(horizontal = 36.dp, vertical = 30.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
@@ -329,43 +350,43 @@ private fun TabletRevealOverlay(
                     LevelDots(
                         level = card.level,
                         activeColor = swatch,
-                        inactiveColor = SessionPalette.Disabled,
+                        inactiveColor = LocalSessionColors.current.Disabled,
                         dotSize = 8.dp,
                     )
                     Text(
                         text = SessionCopy.levelLabel(card.level, state.language),
-                        color = SessionPalette.MutedLabel,
+                        color = LocalSessionColors.current.MutedLabel,
                         fontSize = 10.sp,
                         letterSpacing = 1.4.sp,
                     )
-                    Box(modifier = Modifier.width(1.dp).height(14.dp).background(SessionPalette.Border))
-                    Text(text = card.code, color = SessionPalette.MutedLabel, fontSize = 11.sp, letterSpacing = 1.2.sp)
+                    Box(modifier = Modifier.width(1.dp).height(14.dp).background(LocalSessionColors.current.Border))
+                    Text(text = card.code, color = LocalSessionColors.current.MutedLabel, fontSize = 11.sp, letterSpacing = 1.2.sp)
                 }
             }
 
             Text(
                 text = SessionCopy.readAloud(state.language),
-                color = SessionPalette.MutedLabel,
+                color = LocalSessionColors.current.MutedLabel,
                 fontSize = 10.sp,
                 letterSpacing = 1.6.sp,
             )
 
             Text(
                 text = card.text,
-                color = SessionPalette.Ink,
+                color = LocalSessionColors.current.Ink,
                 fontSize = 34.sp,
                 fontWeight = FontWeight.Bold,
                 lineHeight = 40.sp,
             )
 
             Row(
-                modifier = Modifier.fillMaxWidth().border(width = 1.dp, color = SessionPalette.Border).padding(top = 18.dp),
+                modifier = Modifier.fillMaxWidth().border(width = 1.dp, color = LocalSessionColors.current.Border).padding(top = 18.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = card.about,
-                    color = SessionPalette.MutedLabel,
+                    color = LocalSessionColors.current.MutedLabel,
                     fontSize = 12.sp,
                     modifier = Modifier.weight(1f).padding(top = 18.dp),
                 )
@@ -373,7 +394,7 @@ private fun TabletRevealOverlay(
                     OutlinedButton(
                         onClick = onDrawAnother,
                         shape = RoundedCornerShape(4.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = SessionPalette.Accent),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = LocalSessionColors.current.Accent),
                     ) {
                         Text(
                             text = SessionCopy.drawAnother(state.language),
@@ -386,8 +407,8 @@ private fun TabletRevealOverlay(
                         onClick = { if (nextUndrawn != null) onNext(nextUndrawn) else onClose() },
                         shape = RoundedCornerShape(4.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = SessionPalette.Accent,
-                            contentColor = SessionPalette.OnAccent,
+                            containerColor = LocalSessionColors.current.Accent,
+                            contentColor = LocalSessionColors.current.OnAccent,
                         ),
                     ) {
                         val label = nextUndrawn?.let {

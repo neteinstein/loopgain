@@ -23,7 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.domain.model.CardCategory
 import org.neteinstein.loopgain.ui.components.PileTile
-import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
+import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
 import org.neteinstein.loopgain.ui.viewmodel.SessionUiState
 
 @Composable
@@ -36,10 +37,10 @@ fun SessionDrawScreen(
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f).padding(16.dp)) {
-            Text(text = "Draw the four", color = SessionPalette.Ink, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text(text = SessionCopy.drawTitle(state.language), color = LocalSessionColors.current.Ink, fontSize = 24.sp, fontWeight = FontWeight.Bold)
             Text(
-                text = "${state.drawnCount} of 4 drawn · tap a pile to draw or redraw it",
-                color = SessionPalette.MutedLabel,
+                text = SessionCopy.drawnCountLabel(state.drawnCount, state.language),
+                color = LocalSessionColors.current.MutedLabel,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
             )
@@ -52,6 +53,7 @@ fun SessionDrawScreen(
                 items(state.piles) { pile ->
                     PileTile(
                         pile = pile,
+                        language = state.language,
                         onTap = { onTapPile(pile.category) },
                         modifier = Modifier.aspectRatio(1.05f),
                     )
@@ -61,31 +63,31 @@ fun SessionDrawScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(SessionPalette.PanelBackground)
+                .background(LocalSessionColors.current.PanelBackground)
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(9.dp),
         ) {
             OutlinedButton(
                 onClick = onRedraw,
                 shape = RoundedCornerShape(4.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = SessionPalette.Accent),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = LocalSessionColors.current.Accent),
             ) {
-                Text(text = "REDRAW", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
+                Text(text = SessionCopy.redraw(state.language), fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
             }
             Button(
                 onClick = onRead,
                 enabled = state.canProceedFromDraw,
                 shape = RoundedCornerShape(4.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = SessionPalette.Accent,
-                    contentColor = SessionPalette.OnAccent,
-                    disabledContainerColor = SessionPalette.Disabled,
-                    disabledContentColor = SessionPalette.DisabledText,
+                    containerColor = LocalSessionColors.current.Accent,
+                    contentColor = LocalSessionColors.current.OnAccent,
+                    disabledContainerColor = LocalSessionColors.current.Disabled,
+                    disabledContentColor = LocalSessionColors.current.DisabledText,
                 ),
                 modifier = Modifier.weight(1f),
             ) {
                 Text(
-                    text = if (state.canProceedFromDraw) "READ THEM OUT →" else "DRAW ALL FOUR",
+                    text = SessionCopy.readOrDrawAllLabel(state.canProceedFromDraw, state.language),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 1.2.sp,

@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.domain.model.Language
 import org.neteinstein.loopgain.ui.theme.CardStyles
-import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
 import org.neteinstein.loopgain.ui.viewmodel.CategoryFrequencyUi
 import org.neteinstein.loopgain.ui.viewmodel.HistoryEntryUi
 import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
@@ -39,16 +39,16 @@ import org.neteinstein.loopgain.ui.viewmodel.SessionHistoryUiState
 fun TabletHistoryScreen(historyState: SessionHistoryUiState, language: Language, modifier: Modifier = Modifier) {
     Row(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f).fillMaxHeight().padding(horizontal = 30.dp, vertical = 26.dp)) {
-            Text(text = "SESSION LOG", color = SessionPalette.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
+            Text(text = SessionCopy.sessionLog(language), color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
             Text(
-                text = "Every session logged so far.",
-                color = SessionPalette.Ink,
+                text = SessionCopy.everySessionLogged(language),
+                color = LocalSessionColors.current.Ink,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
             )
             if (historyState.entries.isEmpty()) {
-                Text(text = SessionCopy.noSessionsYet(language), color = SessionPalette.MutedLabel, fontSize = 13.sp)
+                Text(text = SessionCopy.noSessionsYet(language), color = LocalSessionColors.current.MutedLabel, fontSize = 13.sp)
             } else {
                 Column(
                     modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
@@ -62,15 +62,15 @@ fun TabletHistoryScreen(historyState: SessionHistoryUiState, language: Language,
             modifier = Modifier
                 .width(340.dp)
                 .fillMaxHeight()
-                .background(SessionPalette.PanelBackground)
+                .background(LocalSessionColors.current.PanelBackground)
                 .padding(26.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             Column {
-                Text(text = "CARD DRAWS BY CATEGORY", color = SessionPalette.MutedLabel, fontSize = 10.sp, letterSpacing = 1.8.sp)
+                Text(text = SessionCopy.cardDrawsByCategory(language), color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp, letterSpacing = 1.8.sp)
                 Text(
-                    text = "How many of each category have been drawn across every logged session.",
-                    color = SessionPalette.MutedLabel,
+                    text = SessionCopy.categoryFrequencyDescription(language),
+                    color = LocalSessionColors.current.MutedLabel,
                     fontSize = 12.sp,
                     lineHeight = 17.sp,
                     modifier = Modifier.padding(top = 6.dp),
@@ -78,11 +78,11 @@ fun TabletHistoryScreen(historyState: SessionHistoryUiState, language: Language,
             }
             historyState.categoryFrequency.forEach { freq -> TabletFrequencyRow(freq) }
             Text(
-                text = "Team level only — this never shows who said what.",
-                color = SessionPalette.Accent,
+                text = SessionCopy.teamLevelOnlyNote(language),
+                color = LocalSessionColors.current.Accent,
                 fontSize = 12.sp,
                 lineHeight = 17.sp,
-                modifier = Modifier.border(1.dp, SessionPalette.Border).padding(14.dp),
+                modifier = Modifier.border(1.dp, LocalSessionColors.current.Border).padding(14.dp),
             )
         }
     }
@@ -90,10 +90,10 @@ fun TabletHistoryScreen(historyState: SessionHistoryUiState, language: Language,
 
 @Composable
 private fun TabletHistoryEntryRow(entry: HistoryEntryUi, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxWidth().border(1.dp, SessionPalette.Border).padding(16.dp)) {
+    Column(modifier = modifier.fillMaxWidth().border(1.dp, LocalSessionColors.current.Border).padding(16.dp)) {
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            Text(text = "#${entry.sessionNumber}", color = SessionPalette.Accent, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-            Text(text = entry.meta, color = SessionPalette.MutedLabel, fontSize = 12.sp)
+            Text(text = "#${entry.sessionNumber}", color = LocalSessionColors.current.Accent, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+            Text(text = entry.meta, color = LocalSessionColors.current.MutedLabel, fontSize = 12.sp)
         }
         Row(
             modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
@@ -107,15 +107,15 @@ private fun TabletHistoryEntryRow(entry: HistoryEntryUi, modifier: Modifier = Mo
                     fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 0.8.sp,
-                    modifier = Modifier.border(1.dp, SessionPalette.Border).padding(horizontal = 9.dp, vertical = 7.dp),
+                    modifier = Modifier.border(1.dp, LocalSessionColors.current.Border).padding(horizontal = 9.dp, vertical = 7.dp),
                 )
             }
         }
-        Text(text = entry.reflectionNote, color = SessionPalette.Ink, fontSize = 13.sp)
+        Text(text = entry.reflectionNote, color = LocalSessionColors.current.Ink, fontSize = 13.sp)
         if (entry.cards.isNotEmpty()) {
             Text(
                 text = entry.cards.first().text,
-                color = SessionPalette.MutedLabel,
+                color = LocalSessionColors.current.MutedLabel,
                 fontSize = 11.sp,
                 lineHeight = 15.sp,
                 modifier = Modifier.padding(top = 6.dp),
@@ -129,12 +129,12 @@ private fun TabletFrequencyRow(freq: CategoryFrequencyUi, modifier: Modifier = M
     val swatch = CardStyles.forCategory(freq.category).containerColor
     Column(modifier = modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = freq.label, color = SessionPalette.Ink, fontSize = 14.sp)
-            Text(text = "${freq.count}×", color = SessionPalette.MutedLabel, fontSize = 11.sp)
+            Text(text = freq.label, color = LocalSessionColors.current.Ink, fontSize = 14.sp)
+            Text(text = "${freq.count}×", color = LocalSessionColors.current.MutedLabel, fontSize = 11.sp)
         }
         Row(modifier = Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             repeat(freq.maxCount) { i ->
-                Box(modifier = Modifier.size(14.dp).background(if (i < freq.count) swatch else SessionPalette.Disabled))
+                Box(modifier = Modifier.size(14.dp).background(if (i < freq.count) swatch else LocalSessionColors.current.Disabled))
             }
         }
     }

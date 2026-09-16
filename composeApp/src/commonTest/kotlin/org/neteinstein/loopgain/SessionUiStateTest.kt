@@ -28,8 +28,8 @@ class SessionUiStateTest {
 
     @Test
     fun notReadyShowsAddNamesCopy() {
-        val config = SessionConfig(language = Language.EN)
-        val ui = SessionState().toUiState(config, repository)
+        val config = SessionConfig()
+        val ui = SessionState().toUiState(config, Language.EN, repository)
         assertFalse(ui.canStart)
         assertEquals("—", ui.totalLabel)
         assertEquals("ADD NAMES TO START", ui.startLabel)
@@ -37,25 +37,34 @@ class SessionUiStateTest {
 
     @Test
     fun readyStateComputesTheDeckMath() {
-        val config = SessionConfig(language = Language.EN)
+        val config = SessionConfig()
         val engine = SessionEngine(repository, config)
-        val ui = readyState(engine).toUiState(config, repository)
+        val ui = readyState(engine).toUiState(config, Language.EN, repository)
         assertTrue(ui.canStart)
         assertEquals("30:00", ui.totalLabel) // 10 min x 2 people + 10
     }
 
     @Test
     fun portugueseTogglesCopyAndCategoryNames() {
-        val config = SessionConfig(language = Language.PT)
-        val ui = SessionState().toUiState(config, repository)
+        val config = SessionConfig()
+        val ui = SessionState().toUiState(config, Language.PT, repository)
         assertEquals("ADICIONA NOMES PARA COMEÇAR", ui.startLabel)
         assertEquals("Mote", ui.depthPickers.first { it.category == CardCategory.MOTTO }.label)
     }
 
     @Test
+    fun spanishAndFrenchFallBackToEnglishContent() {
+        val config = SessionConfig()
+        val es = SessionState().toUiState(config, Language.ES, repository)
+        val fr = SessionState().toUiState(config, Language.FR, repository)
+        assertEquals("ADD NAMES TO START", es.startLabel)
+        assertEquals("ADD NAMES TO START", fr.startLabel)
+    }
+
+    @Test
     fun mottoDepthPickerHasNoLevels() {
         val config = SessionConfig()
-        val ui = SessionState().toUiState(config, repository)
+        val ui = SessionState().toUiState(config, Language.EN, repository)
         val motto = ui.depthPickers.first { it.category == CardCategory.MOTTO }
         assertFalse(motto.hasLevels)
         assertTrue(motto.levels.isEmpty())
@@ -67,7 +76,7 @@ class SessionUiStateTest {
         val config = SessionConfig()
         val engine = SessionEngine(repository, config)
         var s = engine.startRounds(readyState(engine)).copy(turnSecondsLeft = -5)
-        val ui = s.toUiState(config, repository)
+        val ui = s.toUiState(config, Language.EN, repository)
         assertEquals("−0:05", ui.turnClock)
         assertTrue(ui.turnOver)
     }
@@ -78,11 +87,11 @@ class SessionUiStateTest {
         val engine = SessionEngine(repository, config)
         var s = SessionState()
         assertEquals(SessionStage.SETUP, s.stage)
-        val before = s.toUiState(config, repository)
+        val before = s.toUiState(config, Language.EN, repository)
         assertTrue(before.hint != null)
 
         s = engine.dismissHint(s, s.stage)
-        val after = s.toUiState(config, repository)
+        val after = s.toUiState(config, Language.EN, repository)
         assertNull(after.hint)
     }
 
@@ -96,7 +105,7 @@ class SessionUiStateTest {
         assertTrue(positiveCard.en.contains("_")) // sanity check on the fixture itself
 
         val s = SessionState(drawn = mapOf(CardCategory.POSITIVE_REINFORCEMENT to positiveCard))
-        val card = s.toUiState(config, repository).drawnCards.single()
+        val card = s.toUiState(config, Language.EN, repository).drawnCards.single()
         assertTrue(card.text.contains("_____"), "expected a blanked run in: ${card.text}")
         assertFalse(Regex("(?<!_)_(?!_)").containsMatchIn(card.text), "found a bare underscore in: ${card.text}")
     }
@@ -106,7 +115,7 @@ class SessionUiStateTest {
         val config = SessionConfig()
         val engine = SessionEngine(repository, config)
         var s = engine.startSession(readyState(engine), heldBackIds = emptySet(), random = Random(7))
-        val ui = s.toUiState(config, repository)
+        val ui = s.toUiState(config, Language.EN, repository)
         assertEquals(4, ui.drawnCount)
         assertTrue(ui.canProceedFromDraw)
         assertEquals(4, ui.piles.size)

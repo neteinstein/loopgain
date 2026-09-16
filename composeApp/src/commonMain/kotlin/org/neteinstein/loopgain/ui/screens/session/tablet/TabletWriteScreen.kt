@@ -21,7 +21,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.ui.components.QuestionCardFace
-import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
+import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
 import org.neteinstein.loopgain.ui.viewmodel.SessionUiState
 
 /** Step 3: the four drawn cards laid out as a 2x2 grid on the left, the silent countdown on the right. */
@@ -30,8 +31,8 @@ fun TabletWriteScreen(state: SessionUiState, onDone: () -> Unit, modifier: Modif
     Row(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f).fillMaxHeight().padding(26.dp)) {
             Text(
-                text = "STEP 3 — EVERYONE WRITES",
-                color = SessionPalette.MutedLabel,
+                text = SessionCopy.stepThreeEveryoneWrites(state.language),
+                color = LocalSessionColors.current.MutedLabel,
                 fontSize = 10.sp,
                 letterSpacing = 2.sp,
                 modifier = Modifier.padding(bottom = 14.dp),
@@ -51,22 +52,22 @@ fun TabletWriteScreen(state: SessionUiState, onDone: () -> Unit, modifier: Modif
             modifier = Modifier
                 .width(380.dp)
                 .fillMaxHeight()
-                .background(SessionPalette.PanelBackground)
+                .background(LocalSessionColors.current.PanelBackground)
                 .padding(30.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(text = "SILENT WRITING", color = SessionPalette.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
+            Text(text = SessionCopy.silentWriting(state.language), color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
             Text(
                 text = state.writeClock,
-                color = if (state.writeUrgent) SessionPalette.AccentBright else SessionPalette.Ink,
+                color = if (state.writeUrgent) LocalSessionColors.current.AccentBright else LocalSessionColors.current.Ink,
                 fontSize = 96.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 12.dp),
             )
             Text(
-                text = "Paper only. Nothing is typed into this device, now or later.",
-                color = SessionPalette.Accent,
+                text = SessionCopy.paperOnlyNote(state.language),
+                color = LocalSessionColors.current.Accent,
                 fontSize = 15.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 18.dp),
@@ -74,10 +75,10 @@ fun TabletWriteScreen(state: SessionUiState, onDone: () -> Unit, modifier: Modif
             Button(
                 onClick = onDone,
                 shape = RoundedCornerShape(4.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = SessionPalette.Accent, contentColor = SessionPalette.OnAccent),
+                colors = ButtonDefaults.buttonColors(containerColor = LocalSessionColors.current.Accent, contentColor = LocalSessionColors.current.OnAccent),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(text = "EVERYONE IS DONE →", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.6.sp)
+                Text(text = SessionCopy.everyoneIsDone(state.language), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.6.sp)
             }
         }
     }

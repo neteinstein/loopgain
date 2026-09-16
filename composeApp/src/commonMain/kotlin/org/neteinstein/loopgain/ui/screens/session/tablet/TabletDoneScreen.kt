@@ -23,7 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.ui.theme.CardStyles
-import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.domain.model.SessionStage
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
+import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
 import org.neteinstein.loopgain.ui.viewmodel.SessionUiState
 
 /**
@@ -33,13 +35,13 @@ import org.neteinstein.loopgain.ui.viewmodel.SessionUiState
  * needs just to split a string the phone flow already renders as one line.
  */
 @Composable
-fun TabletDoneScreen(state: SessionUiState, onNewSession: () -> Unit, modifier: Modifier = Modifier) {
+fun TabletDoneScreen(state: SessionUiState, onFinish: () -> Unit, modifier: Modifier = Modifier) {
     Row(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.weight(1f).fillMaxHeight().padding(28.dp)) {
-            Text(text = "LOGGED", color = SessionPalette.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
+            Text(text = SessionCopy.stageLabel(SessionStage.DONE, state.language), color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
             Text(
-                text = "Session logged",
-                color = SessionPalette.Ink,
+                text = SessionCopy.sessionLoggedTitle(state.language),
+                color = LocalSessionColors.current.Ink,
                 fontSize = 38.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 8.dp, bottom = 18.dp),
@@ -52,7 +54,7 @@ fun TabletDoneScreen(state: SessionUiState, onNewSession: () -> Unit, modifier: 
                             Column(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .border(1.dp, SessionPalette.Border)
+                                    .border(1.dp, LocalSessionColors.current.Border)
                                     .padding(15.dp),
                             ) {
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -63,11 +65,11 @@ fun TabletDoneScreen(state: SessionUiState, onNewSession: () -> Unit, modifier: 
                                         fontWeight = FontWeight.SemiBold,
                                         letterSpacing = 1.2.sp,
                                     )
-                                    Text(text = card.code, color = SessionPalette.MutedLabel, fontSize = 10.sp)
+                                    Text(text = card.code, color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp)
                                 }
                                 Text(
                                     text = card.text,
-                                    color = SessionPalette.Ink,
+                                    color = LocalSessionColors.current.Ink,
                                     fontSize = 13.sp,
                                     lineHeight = 18.sp,
                                     modifier = Modifier.padding(top = 9.dp),
@@ -82,42 +84,42 @@ fun TabletDoneScreen(state: SessionUiState, onNewSession: () -> Unit, modifier: 
             modifier = Modifier
                 .width(360.dp)
                 .fillMaxHeight()
-                .background(SessionPalette.PanelBackground)
+                .background(LocalSessionColors.current.PanelBackground)
                 .padding(28.dp),
         ) {
-            Text(text = "SESSION SUMMARY", color = SessionPalette.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
+            Text(text = SessionCopy.sessionSummary(state.language), color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
             Text(
                 text = state.doneSummary,
-                color = SessionPalette.Accent,
+                color = LocalSessionColors.current.Accent,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
                 modifier = Modifier.padding(top = 12.dp),
             )
             androidx.compose.foundation.layout.Box(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 18.dp).height(1.dp).background(SessionPalette.Border),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 18.dp).height(1.dp).background(LocalSessionColors.current.Border),
             )
-            Text(text = "REFLECTION", color = SessionPalette.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
+            Text(text = SessionCopy.reflectionLabel(state.language), color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
             Text(
-                text = state.reflection.ifBlank { "No note added." },
-                color = SessionPalette.Ink,
+                text = state.reflection.ifBlank { SessionCopy.noReflectionNote(state.language) },
+                color = LocalSessionColors.current.Ink,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 10.dp),
             )
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
                 Text(
-                    text = "Next session these four codes join the held-back pile. Nothing anyone said in the room was recorded.",
-                    color = SessionPalette.MutedLabel,
+                    text = SessionCopy.nextSessionHeldBackNote(state.language),
+                    color = LocalSessionColors.current.MutedLabel,
                     fontSize = 12.sp,
                     lineHeight = 17.sp,
                 )
                 Button(
-                    onClick = onNewSession,
+                    onClick = onFinish,
                     shape = RoundedCornerShape(4.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = SessionPalette.Accent, contentColor = SessionPalette.OnAccent),
+                    colors = ButtonDefaults.buttonColors(containerColor = LocalSessionColors.current.Accent, contentColor = LocalSessionColors.current.OnAccent),
                     modifier = Modifier.fillMaxWidth().padding(top = 9.dp),
                 ) {
-                    Text(text = "NEW SESSION", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.6.sp)
+                    Text(text = SessionCopy.finishButton(state.language), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.6.sp)
                 }
             }
         }

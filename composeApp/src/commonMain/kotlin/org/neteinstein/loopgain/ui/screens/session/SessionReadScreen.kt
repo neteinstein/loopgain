@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.ui.components.QuestionCardFace
-import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
 import org.neteinstein.loopgain.ui.viewmodel.SessionUiState
 
 @Composable
@@ -29,7 +29,7 @@ fun SessionReadScreen(
     onNext: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxSize().background(SessionPalette.PanelBackground)) {
+    Column(modifier = modifier.fillMaxSize().background(LocalSessionColors.current.PanelBackground)) {
         val card = state.readCard
         if (card != null) {
             QuestionCardFace(
@@ -45,21 +45,21 @@ fun SessionReadScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(SessionPalette.Background)
+                .background(LocalSessionColors.current.Background)
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(9.dp),
         ) {
             Text(
                 text = state.readFootLabel,
-                color = SessionPalette.MutedLabel,
+                color = LocalSessionColors.current.MutedLabel,
                 fontSize = 11.sp,
                 modifier = Modifier.weight(1f),
             )
             OutlinedButton(
                 onClick = onPrevious,
                 shape = RoundedCornerShape(4.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = SessionPalette.Accent),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = LocalSessionColors.current.Accent),
             ) {
                 Text(text = "←", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             }
@@ -67,8 +67,8 @@ fun SessionReadScreen(
                 onClick = onNext,
                 shape = RoundedCornerShape(4.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = SessionPalette.Accent,
-                    contentColor = SessionPalette.OnAccent,
+                    containerColor = LocalSessionColors.current.Accent,
+                    contentColor = LocalSessionColors.current.OnAccent,
                 ),
             ) {
                 Text(text = state.readNextLabel, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)

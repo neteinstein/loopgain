@@ -27,8 +27,9 @@ import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.domain.model.CardCategory
 import org.neteinstein.loopgain.ui.components.LevelDots
 import org.neteinstein.loopgain.ui.theme.CardStyles
-import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
 import org.neteinstein.loopgain.ui.viewmodel.PileUi
+import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
 import org.neteinstein.loopgain.ui.viewmodel.SessionUiState
 
 /**
@@ -51,16 +52,16 @@ fun TabletDrawScreen(
             verticalAlignment = Alignment.Bottom,
         ) {
             Column {
-                Text(text = "STEP 2 — DRAW", color = SessionPalette.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
+                Text(text = SessionCopy.stepTwoDraw(state.language), color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp, letterSpacing = 2.sp)
                 Text(
-                    text = "Tap each pile. Read it to the room.",
-                    color = SessionPalette.Ink,
+                    text = SessionCopy.tapEachPileReadToRoom(state.language),
+                    color = LocalSessionColors.current.Ink,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 9.dp),
                 )
             }
-            Text(text = "${state.drawnCount} of 4 drawn", color = SessionPalette.MutedLabel, fontSize = 13.sp)
+            Text(text = SessionCopy.drawnOfFourLabel(state.drawnCount, state.language), color = LocalSessionColors.current.MutedLabel, fontSize = 13.sp)
         }
 
         Row(
@@ -70,6 +71,7 @@ fun TabletDrawScreen(
             state.piles.forEach { pile ->
                 TabletPileTile(
                     pile = pile,
+                    language = state.language,
                     onTap = { onTapPile(pile.category) },
                     modifier = Modifier.weight(1f).fillMaxSize(),
                 )
@@ -79,30 +81,30 @@ fun TabletDrawScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(SessionPalette.PanelBackground)
+                .background(LocalSessionColors.current.PanelBackground)
                 .padding(horizontal = 30.dp, vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             OutlinedButton(
                 onClick = onRedraw,
                 shape = RoundedCornerShape(4.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = SessionPalette.Accent),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = LocalSessionColors.current.Accent),
             ) {
-                Text(text = "REDRAW ALL", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp)
+                Text(text = SessionCopy.redrawAll(state.language), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp)
             }
             Button(
                 onClick = onStartWrite,
                 enabled = state.canProceedFromDraw,
                 shape = RoundedCornerShape(4.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = SessionPalette.Accent,
-                    contentColor = SessionPalette.OnAccent,
-                    disabledContainerColor = SessionPalette.Disabled,
-                    disabledContentColor = SessionPalette.DisabledText,
+                    containerColor = LocalSessionColors.current.Accent,
+                    contentColor = LocalSessionColors.current.OnAccent,
+                    disabledContainerColor = LocalSessionColors.current.Disabled,
+                    disabledContentColor = LocalSessionColors.current.DisabledText,
                 ),
             ) {
                 Text(
-                    text = if (state.canProceedFromDraw) "READ ALOUD, THEN WRITE →" else "DRAW ALL FOUR TO CONTINUE",
+                    text = SessionCopy.readAloudThenWriteLabel(state.canProceedFromDraw, state.language),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 1.4.sp,
@@ -113,13 +115,13 @@ fun TabletDrawScreen(
 }
 
 @Composable
-private fun TabletPileTile(pile: PileUi, onTap: () -> Unit, modifier: Modifier = Modifier) {
+private fun TabletPileTile(pile: PileUi, language: org.neteinstein.loopgain.domain.model.Language, onTap: () -> Unit, modifier: Modifier = Modifier) {
     val swatch = CardStyles.forCategory(pile.category).containerColor
     Column(
         modifier = modifier
             .aspectRatio(0.78f)
-            .border(1.dp, if (pile.isDrawn) SessionPalette.Accent else SessionPalette.Border)
-            .background(if (pile.isDrawn) androidx.compose.ui.graphics.Color.White else SessionPalette.PanelBackground)
+            .border(1.dp, if (pile.isDrawn) LocalSessionColors.current.Accent else LocalSessionColors.current.Border)
+            .background(if (pile.isDrawn) LocalSessionColors.current.Background else LocalSessionColors.current.PanelBackground)
             .clickable(onClick = onTap)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -134,23 +136,23 @@ private fun TabletPileTile(pile: PileUi, onTap: () -> Unit, modifier: Modifier =
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 1.2.sp,
                 )
-                Text(text = pile.code.orEmpty(), color = SessionPalette.MutedLabel, fontSize = 10.sp)
+                Text(text = pile.code.orEmpty(), color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp)
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = pile.code ?: "",
-                    color = SessionPalette.Ink,
+                    color = LocalSessionColors.current.Ink,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
-                    text = "drawn — tap to read again",
-                    color = SessionPalette.MutedSecondary,
+                    text = SessionCopy.drawnTapToReadAgain(language),
+                    color = LocalSessionColors.current.MutedSecondary,
                     fontSize = 10.sp,
                     modifier = Modifier.padding(top = 6.dp),
                 )
             }
-            LevelDots(level = pile.level, activeColor = swatch, inactiveColor = SessionPalette.Disabled)
+            LevelDots(level = pile.level, activeColor = swatch, inactiveColor = LocalSessionColors.current.Disabled)
         } else {
             Column(
                 modifier = Modifier.weight(1f),
@@ -158,10 +160,10 @@ private fun TabletPileTile(pile: PileUi, onTap: () -> Unit, modifier: Modifier =
                 verticalArrangement = Arrangement.Center,
             ) {
                 androidx.compose.foundation.layout.Box(
-                    modifier = Modifier.size(58.dp).border(1.dp, SessionPalette.Accent, CircleShape).clip(CircleShape),
+                    modifier = Modifier.size(58.dp).border(1.dp, LocalSessionColors.current.Accent, CircleShape).clip(CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(text = "∞", color = SessionPalette.Accent, fontSize = 26.sp)
+                    Text(text = "∞", color = LocalSessionColors.current.Accent, fontSize = 26.sp)
                 }
                 Text(
                     text = pile.label.uppercase(),
@@ -172,18 +174,14 @@ private fun TabletPileTile(pile: PileUi, onTap: () -> Unit, modifier: Modifier =
                     modifier = Modifier.padding(top = 14.dp),
                 )
                 Text(
-                    text = if (pile.heldBackCount > 0) {
-                        "${pile.availableCount} ready · ${pile.heldBackCount} held back"
-                    } else {
-                        "${pile.availableCount} ready"
-                    },
-                    color = SessionPalette.MutedLabel,
+                    text = SessionCopy.pileAvailabilityLabel(false, pile.availableCount, pile.heldBackCount, language),
+                    color = LocalSessionColors.current.MutedLabel,
                     fontSize = 11.sp,
                     modifier = Modifier.padding(top = 4.dp),
                 )
                 Text(
-                    text = "TAP TO DRAW",
-                    color = SessionPalette.Accent,
+                    text = SessionCopy.tapToDraw(language),
+                    color = LocalSessionColors.current.Accent,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 1.6.sp,

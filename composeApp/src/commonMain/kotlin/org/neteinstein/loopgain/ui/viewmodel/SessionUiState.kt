@@ -106,8 +106,11 @@ private fun QuestionCard.toCardFaceUi(language: Language): CardFaceUi = CardFace
     about = SessionCopy.about(category, language),
 )
 
-fun SessionState.toUiState(config: SessionConfig, cardRepository: org.neteinstein.loopgain.data.repository.CardRepository): SessionUiState {
-    val language = config.language
+fun SessionState.toUiState(
+    config: SessionConfig,
+    language: Language,
+    cardRepository: org.neteinstein.loopgain.data.repository.CardRepository,
+): SessionUiState {
     val ready = isReady
     val total = totalSecondsFor(this, config)
     val drawnList = drawnInOrder.map { it.toCardFaceUi(language) }

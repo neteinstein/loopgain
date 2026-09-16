@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
 
 /** A one-line, dismissible tip shown at the top of a stage — same role for every screen. */
 @Composable
@@ -19,19 +19,19 @@ fun HintBanner(text: String, onDismiss: () -> Unit, modifier: Modifier = Modifie
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(SessionPalette.PanelBackground)
+            .background(LocalSessionColors.current.PanelBackground)
             .padding(start = 16.dp, end = 4.dp, top = 11.dp, bottom = 11.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = text,
-            color = SessionPalette.Accent,
+            color = LocalSessionColors.current.Accent,
             fontSize = 12.sp,
             lineHeight = 17.sp,
             modifier = Modifier.weight(1f),
         )
         IconButton(onClick = onDismiss) {
-            Text(text = "×", color = SessionPalette.MutedLabel, fontSize = 18.sp)
+            Text(text = "×", color = LocalSessionColors.current.MutedLabel, fontSize = 18.sp)
         }
     }
 }

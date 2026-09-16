@@ -6,12 +6,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.neteinstein.loopgain.data.repository.CardRepository
 import org.neteinstein.loopgain.data.repository.SessionHistoryRepository
+import org.neteinstein.loopgain.data.repository.SettingsRepository
 import org.neteinstein.loopgain.domain.model.CardCategory
 import org.neteinstein.loopgain.domain.model.CardLevel
 import org.neteinstein.loopgain.domain.model.SessionConfig
@@ -23,11 +24,13 @@ import org.neteinstein.loopgain.domain.session.SessionState
  * Shared session view model: one instance of this drives the phone's screen-per-stage flow and
  * the tablet's facilitator board equally. It owns [SessionEngine] (the pure state machine),
  * a one-second timer, and exposes a formatted [SessionUiState] so screens do no logic of their
- * own beyond layout.
+ * own beyond layout. Display language comes from [settingsRepository] rather than [config], so
+ * changing it in Settings updates [uiState] immediately without recreating this view model.
  */
 class SessionViewModel(
     private val cardRepository: CardRepository,
     private val sessionHistoryRepository: SessionHistoryRepository,
+    private val settingsRepository: SettingsRepository,
     private val config: SessionConfig = SessionConfig(),
 ) : ViewModel() {
 
@@ -35,9 +38,13 @@ class SessionViewModel(
 
     private val state = MutableStateFlow(SessionState())
 
-    val uiState: StateFlow<SessionUiState> = state
-        .map { it.toUiState(config, cardRepository) }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, state.value.toUiState(config, cardRepository))
+    val uiState: StateFlow<SessionUiState> = combine(state, settingsRepository.language) { s, language ->
+        s.toUiState(config, language, cardRepository)
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        state.value.toUiState(config, settingsRepository.language.value, cardRepository),
+    )
 
     init {
         viewModelScope.launch {

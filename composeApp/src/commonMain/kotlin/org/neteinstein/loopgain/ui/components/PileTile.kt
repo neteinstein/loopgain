@@ -10,23 +10,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.neteinstein.loopgain.domain.model.Language
 import org.neteinstein.loopgain.ui.theme.CardStyles
-import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.theme.LocalSessionColors
 import org.neteinstein.loopgain.ui.viewmodel.PileUi
+import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
 
 /** One of the four draw piles: face-down until tapped, then shows its drawn code. */
 @Composable
-fun PileTile(pile: PileUi, onTap: () -> Unit, modifier: Modifier = Modifier) {
+fun PileTile(pile: PileUi, language: Language, onTap: () -> Unit, modifier: Modifier = Modifier) {
     val swatch = CardStyles.forCategory(pile.category).containerColor
     Column(
         modifier = modifier
             .fillMaxSize()
-            .border(1.dp, if (pile.isDrawn) swatch else SessionPalette.Border)
-            .background(if (pile.isDrawn) Color.White else SessionPalette.PanelBackground)
+            .border(1.dp, if (pile.isDrawn) swatch else LocalSessionColors.current.Border)
+            .background(if (pile.isDrawn) LocalSessionColors.current.Background else LocalSessionColors.current.PanelBackground)
             .clickable(onClick = onTap)
             .padding(11.dp),
         verticalArrangement = Arrangement.SpaceBetween,
@@ -42,26 +43,20 @@ fun PileTile(pile: PileUi, onTap: () -> Unit, modifier: Modifier = Modifier) {
             LevelDots(
                 level = pile.level,
                 activeColor = swatch,
-                inactiveColor = SessionPalette.Disabled,
+                inactiveColor = LocalSessionColors.current.Disabled,
                 modifier = Modifier.padding(top = 7.dp),
             )
         }
         Column {
             Text(
                 text = pile.code ?: "TAP",
-                color = SessionPalette.Ink,
+                color = LocalSessionColors.current.Ink,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = if (pile.isDrawn) {
-                    "drawn"
-                } else if (pile.heldBackCount > 0) {
-                    "${pile.availableCount} ready · ${pile.heldBackCount} held back"
-                } else {
-                    "${pile.availableCount} ready"
-                },
-                color = SessionPalette.MutedSecondary,
+                text = SessionCopy.pileAvailabilityLabel(pile.isDrawn, pile.availableCount, pile.heldBackCount, language),
+                color = LocalSessionColors.current.MutedSecondary,
                 fontSize = 10.sp,
                 modifier = Modifier.padding(top = 4.dp),
             )
