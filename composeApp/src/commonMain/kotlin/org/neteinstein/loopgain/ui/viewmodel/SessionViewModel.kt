@@ -93,4 +93,10 @@ class SessionViewModel(
     fun resetSession() = state.update { engine.reset(it) }
 
     fun dismissHint() = state.update { engine.dismissHint(it, it.stage) }
+
+    /** Logged sessions, most recent first — backs the tablet's History screen. */
+    fun historyEntries(): List<SessionHistoryEntry> = sessionHistoryRepository.all()
+
+    /** The session number that will be assigned the next time [logSession] runs. */
+    fun nextSessionNumber(): Int = sessionHistoryRepository.nextSessionNumber()
 }

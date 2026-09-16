@@ -1,6 +1,7 @@
 package org.neteinstein.loopgain.ui.viewmodel
 
 import org.neteinstein.loopgain.domain.model.CardCategory
+import org.neteinstein.loopgain.domain.model.CardLevel
 import org.neteinstein.loopgain.domain.model.Language
 import org.neteinstein.loopgain.domain.model.SessionConfig
 import org.neteinstein.loopgain.domain.model.SessionStage
@@ -149,4 +150,44 @@ internal object SessionCopy {
 
         SessionStage.DONE -> null
     }
+
+    // --- Tablet-only additions below. Same rule: dynamic/interpolated copy lives here in both
+    // languages; purely static section labels (e.g. "CLOCKWISE ORDER") stay as literals in the
+    // tablet composables, matching the precedent already set by the phone screens above.
+
+    fun levelLabel(level: CardLevel?, language: Language): String {
+        if (level == null) return dash
+        return if (language == Language.EN) "LEVEL ${level.dots} OF 3" else "NÍVEL ${level.dots} DE 3"
+    }
+
+    fun readAloud(language: Language): String =
+        if (language == Language.EN) "READ THIS TO THE ROOM" else "LÊ ISTO EM VOZ ALTA"
+
+    fun drawAnother(language: Language): String =
+        if (language == Language.EN) "DRAW ANOTHER" else "TIRAR OUTRA"
+
+    fun nextCategoryCard(categoryLabel: String, language: Language): String =
+        if (language == Language.EN) {
+            "NEXT: ${categoryLabel.uppercase()} CARD →"
+        } else {
+            "SEGUINTE: CARTA ${categoryLabel.uppercase()} →"
+        }
+
+    fun backToBoard(language: Language): String =
+        if (language == Language.EN) "BACK TO THE BOARD →" else "VOLTAR AO TABULEIRO →"
+
+    fun historyMeta(participants: Int, minutes: Int, language: Language): String =
+        if (language == Language.EN) {
+            val word = if (participants == 1) "person" else "people"
+            "$participants $word · $minutes min"
+        } else {
+            val word = if (participants == 1) "pessoa" else "pessoas"
+            "$participants $word · $minutes min"
+        }
+
+    fun noReflectionNote(language: Language): String =
+        if (language == Language.EN) "No note added." else "Sem nota adicionada."
+
+    fun noSessionsYet(language: Language): String =
+        if (language == Language.EN) "No sessions logged yet." else "Ainda não há sessões registadas."
 }
