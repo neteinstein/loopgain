@@ -14,13 +14,17 @@ private val SkyBlue = Color(0xFFB9D9EB) // Background color - soft backgrounds, 
 private val Cerulean = Color(0xFF4A90E2) // Secondary accent color
 private val Red = Color(0xFFE5342F) // Red accent - matches the neteinstein/CoupleMoments primary red
 
-// Card type specific colors
+// Card type specific colors — sampled from the printed deck photographs (docs/…pdf, pages 54 and
+// 95); see .claude/skills/card-face. Treat the three blues and the red as "match the printed
+// deck" targets rather than exact brand values.
 object CardColors {
     val Motto = Color(0xFF0D2254) // Deep Navy - MOTTO card
-    val PersonalQuestion = Color(0xFFB9D9EB) // Sky Blue - PERSONAL QUESTION card
-    val Improvements = Color(0xFF86B3D1) // Steel Blue - IMPROVEMENTS card
-    val PositiveReinforcement = Color(0xFF4A90E2) // Cerulean - POSITIVE REINFORCEMENT card
-    val Typography = Color(0xFFFFFFFF) // Pure White - typography and card edges
+    val PersonalQuestion = Color(0xFFC8DFEF) // PERSONAL QUESTION card
+    val Improvements = Color(0xFFA9D0E8) // IMPROVEMENTS card
+    val PositiveReinforcement = Color(0xFF5BB8E8) // POSITIVE REINFORCEMENT card
+    val Typography = Color(0xFFFFFFFF) // Pure White - Motto card text only
+    /** The three light cards print navy text — white on Sky Blue fails contrast. */
+    val TypographyOnLight = Color(0xFF0D2254)
 }
 
 /** The brand's title color — matches neteinstein/CoupleMoments' primary red. */

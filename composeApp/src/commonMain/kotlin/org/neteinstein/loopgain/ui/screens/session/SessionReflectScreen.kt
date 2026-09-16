@@ -1,0 +1,101 @@
+package org.neteinstein.loopgain.ui.screens.session
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import org.neteinstein.loopgain.ui.theme.SessionPalette
+import org.neteinstein.loopgain.ui.viewmodel.SessionUiState
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SessionReflectScreen(
+    state: SessionUiState,
+    onReflectionChange: (String) -> Unit,
+    onQuickPick: (String) -> Unit,
+    onLog: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(18.dp),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(text = "CLOSING", color = SessionPalette.MutedLabel, fontSize = 10.sp, letterSpacing = 1.8.sp)
+            Text(
+                text = "How did that feel?",
+                color = SessionPalette.Ink,
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 4.dp, bottom = 6.dp),
+            )
+            Text(
+                text = "Say it out loud first. Then one line for the record — about the session, not about anyone in it.",
+                color = SessionPalette.Accent,
+                fontSize = 13.sp,
+                modifier = Modifier.padding(bottom = 14.dp),
+            )
+            BasicTextField(
+                value = state.reflection,
+                onValueChange = onReflectionChange,
+                textStyle = TextStyle(color = SessionPalette.Ink, fontSize = 15.sp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, SessionPalette.Accent)
+                    .padding(15.dp),
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(top = 8.dp),
+            ) {
+                state.quickReflections.forEach { quick ->
+                    Text(
+                        text = quick,
+                        color = SessionPalette.Accent,
+                        fontSize = 12.sp,
+                        modifier = Modifier
+                            .border(1.dp, SessionPalette.Border)
+                            .clickable { onQuickPick(quick) }
+                            .padding(horizontal = 11.dp, vertical = 9.dp),
+                    )
+                }
+            }
+            Text(
+                text = "Saved with the session: four card codes, the date, the length, this line.",
+                color = SessionPalette.MutedLabel,
+                fontSize = 11.sp,
+                modifier = Modifier.padding(top = 10.dp),
+            )
+        }
+        Button(
+            onClick = onLog,
+            shape = RoundedCornerShape(4.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = SessionPalette.Accent, contentColor = SessionPalette.OnAccent),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(SessionPalette.PanelBackground)
+                .padding(16.dp),
+        ) {
+            Text(text = "LOG SESSION", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.4.sp)
+        }
+    }
+}

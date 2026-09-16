@@ -12,10 +12,15 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import org.neteinstein.loopgain.ui.screens.CardDeckScreen
 import org.neteinstein.loopgain.ui.screens.LoadingScreen
+import org.neteinstein.loopgain.ui.screens.session.SessionFlowScreen
 
 sealed class Screen(val route: String) {
     data object Loading : Screen("loading")
+
+    // Superseded by Session below and no longer reachable from Loading, but kept — not
+    // deleted — while the new session flow settles in. See AGENTS.md.
     data object CardDeck : Screen("card_deck")
+    data object Session : Screen("session")
 }
 
 @Composable
@@ -29,15 +34,19 @@ fun AppNavigation() {
     ) {
         composable(Screen.Loading.route) {
             LoadingScreen()
-            
+
             LaunchedEffect(Unit) {
                 delay(2500) // Show loading screen for 2.5 seconds
-                navController.navigate(Screen.CardDeck.route) {
+                navController.navigate(Screen.Session.route) {
                     popUpTo(Screen.Loading.route) { inclusive = true }
                 }
             }
         }
-        
+
+        composable(Screen.Session.route) {
+            SessionFlowScreen()
+        }
+
         composable(Screen.CardDeck.route) {
             CardDeckScreen()
         }
