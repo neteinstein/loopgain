@@ -9,6 +9,7 @@ import org.neteinstein.loopgain.domain.model.SessionConfig
 import org.neteinstein.loopgain.domain.model.SessionStage
 import org.neteinstein.loopgain.domain.model.SessionTurnPhase
 import org.neteinstein.loopgain.domain.session.SessionState
+import org.neteinstein.loopgain.ui.components.asBlankedQuestion
 
 /**
  * Formatted, [Language]-resolved view of a [SessionState]. Colour-free like the domain model — a
@@ -97,7 +98,10 @@ private fun QuestionCard.toCardFaceUi(language: Language): CardFaceUi = CardFace
     category = category,
     label = category.displayName(language),
     code = code,
-    text = text(language),
+    // Blanked once here so every consumer (read screen, write/rounds/done previews, the
+    // tablet's reveal overlay) shows the same visibly-blank run instead of a bare "_" —
+    // see QuestionCardFace.asBlankedQuestion().
+    text = text(language).asBlankedQuestion(),
     level = level,
     about = SessionCopy.about(category, language),
 )

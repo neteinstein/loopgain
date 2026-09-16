@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.neteinstein.loopgain.ui.components.asBlankedQuestion
 import org.neteinstein.loopgain.ui.theme.CardStyles
 import org.neteinstein.loopgain.ui.theme.SessionPalette
 import org.neteinstein.loopgain.ui.viewmodel.SessionUiState
@@ -67,7 +66,7 @@ fun TabletDoneScreen(state: SessionUiState, onNewSession: () -> Unit, modifier: 
                                     Text(text = card.code, color = SessionPalette.MutedLabel, fontSize = 10.sp)
                                 }
                                 Text(
-                                    text = card.text.asBlankedQuestion(),
+                                    text = card.text,
                                     color = SessionPalette.Ink,
                                     fontSize = 13.sp,
                                     lineHeight = 18.sp,

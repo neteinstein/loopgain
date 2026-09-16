@@ -5,6 +5,7 @@ import org.neteinstein.loopgain.domain.model.CardCategory
 import org.neteinstein.loopgain.domain.model.Language
 import org.neteinstein.loopgain.domain.model.QuestionCard
 import org.neteinstein.loopgain.domain.model.SessionHistoryEntry
+import org.neteinstein.loopgain.ui.components.asBlankedQuestion
 
 /**
  * Tablet-only "History" screen state: a facilitator-facing log of past sessions plus an honest,
@@ -45,7 +46,7 @@ fun List<SessionHistoryEntry>.toHistoryUiState(language: Language): SessionHisto
         HistoryEntryUi(
             sessionNumber = entry.sessionNumber,
             meta = SessionCopy.historyMeta(entry.participantCount, entry.usedSeconds / 60, language),
-            cards = cards.map { HistoryCardUi(category = it.category, code = it.code, text = it.text(language)) },
+            cards = cards.map { HistoryCardUi(category = it.category, code = it.code, text = it.text(language).asBlankedQuestion()) },
             reflectionNote = entry.reflectionNote.ifBlank { SessionCopy.noReflectionNote(language) },
         )
     }

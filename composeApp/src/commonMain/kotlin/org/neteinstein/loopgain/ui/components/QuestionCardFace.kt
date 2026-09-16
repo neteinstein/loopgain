@@ -54,7 +54,7 @@ fun QuestionCardFace(
         }
 
         Text(
-            text = card.text.asBlankedQuestion(),
+            text = card.text,
             color = style.contentColor,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,

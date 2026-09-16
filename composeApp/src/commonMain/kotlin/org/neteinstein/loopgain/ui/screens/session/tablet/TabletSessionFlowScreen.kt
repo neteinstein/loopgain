@@ -6,13 +6,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -38,7 +42,6 @@ import org.neteinstein.loopgain.domain.model.CardCategory
 import org.neteinstein.loopgain.domain.model.SessionStage
 import org.neteinstein.loopgain.ui.components.HintBanner
 import org.neteinstein.loopgain.ui.components.LevelDots
-import org.neteinstein.loopgain.ui.components.asBlankedQuestion
 import org.neteinstein.loopgain.ui.theme.CardStyles
 import org.neteinstein.loopgain.ui.theme.SessionPalette
 import org.neteinstein.loopgain.ui.theme.TitleRed
@@ -98,7 +101,7 @@ fun TabletSessionFlowScreen(viewModel: SessionViewModel = koinViewModel(), modif
                 }
             }
 
-            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            Box(modifier = Modifier.weight(1f).fillMaxWidth().windowInsetsPadding(WindowInsets.navigationBars)) {
                 if (showHistory) {
                     TabletHistoryScreen(
                         historyState = viewModel.historyEntries().toHistoryUiState(state.language),
@@ -193,6 +196,7 @@ private fun TabletHeader(
         modifier = modifier
             .fillMaxWidth()
             .border(width = 1.dp, color = SessionPalette.Border)
+            .windowInsetsPadding(WindowInsets.statusBars)
             .padding(horizontal = 26.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -347,7 +351,7 @@ private fun TabletRevealOverlay(
             )
 
             Text(
-                text = card.text.asBlankedQuestion(),
+                text = card.text,
                 color = SessionPalette.Ink,
                 fontSize = 34.sp,
                 fontWeight = FontWeight.Bold,

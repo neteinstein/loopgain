@@ -22,7 +22,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.domain.model.Language
-import org.neteinstein.loopgain.ui.components.asBlankedQuestion
 import org.neteinstein.loopgain.ui.theme.CardStyles
 import org.neteinstein.loopgain.ui.theme.SessionPalette
 import org.neteinstein.loopgain.ui.viewmodel.CategoryFrequencyUi
@@ -115,7 +114,7 @@ private fun TabletHistoryEntryRow(entry: HistoryEntryUi, modifier: Modifier = Mo
         Text(text = entry.reflectionNote, color = SessionPalette.Ink, fontSize = 13.sp)
         if (entry.cards.isNotEmpty()) {
             Text(
-                text = entry.cards.first().text.asBlankedQuestion(),
+                text = entry.cards.first().text,
                 color = SessionPalette.MutedLabel,
                 fontSize = 11.sp,
                 lineHeight = 15.sp,

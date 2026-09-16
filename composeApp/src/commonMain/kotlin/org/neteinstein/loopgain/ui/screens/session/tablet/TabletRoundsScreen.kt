@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.domain.model.CardCategory
 import org.neteinstein.loopgain.ui.components.LevelDots
-import org.neteinstein.loopgain.ui.components.asBlankedQuestion
 import org.neteinstein.loopgain.ui.theme.CardStyles
 import org.neteinstein.loopgain.ui.theme.SessionPalette
 import org.neteinstein.loopgain.ui.viewmodel.CardFaceUi
@@ -230,7 +229,7 @@ private fun TabletActiveCardRow(card: CardFaceUi, modifier: Modifier = Modifier)
             )
         }
         Text(
-            text = card.text.asBlankedQuestion(),
+            text = card.text,
             color = SessionPalette.Ink,
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,

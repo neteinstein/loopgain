@@ -2,7 +2,10 @@ package org.neteinstein.loopgain.ui.screens.session
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -39,51 +42,53 @@ fun SessionFlowScreen(viewModel: SessionViewModel = koinViewModel(), modifier: M
         state.hint?.let { hint ->
             HintBanner(text = hint, onDismiss = viewModel::dismissHint)
         }
-        when (state.stage) {
-            SessionStage.SETUP -> SessionSetupScreen(
-                state = state,
-                onAddPerson = viewModel::addPerson,
-                onRemovePerson = viewModel::removePerson,
-                onRenamePerson = viewModel::renamePerson,
-                onPickLevel = viewModel::setLevel,
-                onStart = viewModel::startSession,
-            )
+        Column(modifier = Modifier.weight(1f).windowInsetsPadding(WindowInsets.navigationBars)) {
+            when (state.stage) {
+                SessionStage.SETUP -> SessionSetupScreen(
+                    state = state,
+                    onAddPerson = viewModel::addPerson,
+                    onRemovePerson = viewModel::removePerson,
+                    onRenamePerson = viewModel::renamePerson,
+                    onPickLevel = viewModel::setLevel,
+                    onStart = viewModel::startSession,
+                )
 
-            SessionStage.DRAW -> SessionDrawScreen(
-                state = state,
-                onTapPile = viewModel::drawOne,
-                onRedraw = viewModel::redrawAll,
-                onRead = viewModel::enterRead,
-            )
+                SessionStage.DRAW -> SessionDrawScreen(
+                    state = state,
+                    onTapPile = viewModel::drawOne,
+                    onRedraw = viewModel::redrawAll,
+                    onRead = viewModel::enterRead,
+                )
 
-            SessionStage.READ -> SessionReadScreen(
-                state = state,
-                onPrevious = viewModel::previousReadCard,
-                onNext = viewModel::advanceRead,
-            )
+                SessionStage.READ -> SessionReadScreen(
+                    state = state,
+                    onPrevious = viewModel::previousReadCard,
+                    onNext = viewModel::advanceRead,
+                )
 
-            SessionStage.WRITE -> SessionWriteScreen(
-                state = state,
-                onDone = viewModel::startRounds,
-            )
+                SessionStage.WRITE -> SessionWriteScreen(
+                    state = state,
+                    onDone = viewModel::startRounds,
+                )
 
-            SessionStage.ROUNDS -> SessionRoundsScreen(
-                state = state,
-                onSkip = viewModel::skipToReflect,
-                onAdvance = viewModel::advanceRounds,
-            )
+                SessionStage.ROUNDS -> SessionRoundsScreen(
+                    state = state,
+                    onSkip = viewModel::skipToReflect,
+                    onAdvance = viewModel::advanceRounds,
+                )
 
-            SessionStage.REFLECT -> SessionReflectScreen(
-                state = state,
-                onReflectionChange = viewModel::setReflection,
-                onQuickPick = viewModel::setReflection,
-                onLog = viewModel::logSession,
-            )
+                SessionStage.REFLECT -> SessionReflectScreen(
+                    state = state,
+                    onReflectionChange = viewModel::setReflection,
+                    onQuickPick = viewModel::setReflection,
+                    onLog = viewModel::logSession,
+                )
 
-            SessionStage.DONE -> SessionDoneScreen(
-                state = state,
-                onNewSession = viewModel::resetSession,
-            )
+                SessionStage.DONE -> SessionDoneScreen(
+                    state = state,
+                    onNewSession = viewModel::resetSession,
+                )
+            }
         }
     }
 }
