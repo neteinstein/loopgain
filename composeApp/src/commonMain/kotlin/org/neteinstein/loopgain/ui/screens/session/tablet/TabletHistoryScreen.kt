@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.neteinstein.loopgain.domain.model.Language
@@ -95,32 +96,26 @@ private fun TabletHistoryEntryRow(entry: HistoryEntryUi, modifier: Modifier = Mo
             Text(text = "#${entry.sessionNumber}", color = LocalSessionColors.current.Accent, fontSize = 15.sp, fontWeight = FontWeight.Bold)
             Text(text = entry.meta, color = LocalSessionColors.current.MutedLabel, fontSize = 12.sp)
         }
-        Row(
+        Column(
             modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             entry.cards.forEach { card ->
                 val swatch = CardStyles.forCategory(card.category).containerColor
-                Text(
-                    text = card.code,
-                    color = swatch,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.8.sp,
-                    modifier = Modifier.border(1.dp, LocalSessionColors.current.Border).padding(horizontal = 9.dp, vertical = 7.dp),
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                    Box(modifier = Modifier.padding(top = 5.dp).size(7.dp).background(swatch))
+                    Text(
+                        text = card.text,
+                        color = LocalSessionColors.current.Ink,
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
-        Text(text = entry.reflectionNote, color = LocalSessionColors.current.Ink, fontSize = 13.sp)
-        if (entry.cards.isNotEmpty()) {
-            Text(
-                text = entry.cards.first().text,
-                color = LocalSessionColors.current.MutedLabel,
-                fontSize = 11.sp,
-                lineHeight = 15.sp,
-                modifier = Modifier.padding(top = 6.dp),
-            )
-        }
+        Text(text = entry.reflectionNote, color = LocalSessionColors.current.MutedLabel, fontSize = 13.sp)
     }
 }
 
