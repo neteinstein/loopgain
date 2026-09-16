@@ -12,6 +12,7 @@ private val NavyBlue = Color(0xFF0D2254) // Primary color - headers, primary but
 private val SteelBlue = Color(0xFF86B3D1) // Tertiary color - accents, differentiating categories
 private val SkyBlue = Color(0xFFB9D9EB) // Background color - soft backgrounds, cards
 private val Cerulean = Color(0xFF4A90E2) // Secondary accent color
+private val Red = Color(0xFFE5342F) // Red accent - matches the neteinstein/CoupleMoments primary red
 
 // Card type specific colors
 object CardColors {
@@ -21,6 +22,9 @@ object CardColors {
     val PositiveReinforcement = Color(0xFF4A90E2) // Cerulean - POSITIVE REINFORCEMENT card
     val Typography = Color(0xFFFFFFFF) // Pure White - typography and card edges
 }
+
+/** The brand's title color — matches neteinstein/CoupleMoments' primary red. */
+val TitleRed = Red
 
 private val LightColorScheme = lightColorScheme(
     primary = NavyBlue,

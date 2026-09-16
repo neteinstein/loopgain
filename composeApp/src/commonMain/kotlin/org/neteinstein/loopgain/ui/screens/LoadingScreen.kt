@@ -1,34 +1,22 @@
 package org.neteinstein.loopgain.ui.screens
 
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.neteinstein.loopgain.ui.theme.LoopGainMark
+import org.neteinstein.loopgain.ui.theme.LoopGainWordmark
+import org.neteinstein.loopgain.ui.theme.TitleRed
 
 @Composable
 fun LoadingScreen() {
-    val infiniteTransition = rememberInfiniteTransition()
-    
-    val alpha by infiniteTransition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -46,24 +34,30 @@ fun LoadingScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // LoopGain text with LoopGain.org styling
-            Text(
-                text = "LoopGain",
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.alpha(alpha),
-                letterSpacing = 2.sp
+            // A glint travels continuously around the mark and the wordmark's "oo" — energy
+            // flowing through the loop, rather than the old fade-in/fade-out blink.
+            LoopGainMark(
+                modifier = Modifier.size(width = 96.dp, height = 48.dp)
             )
-            
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LoopGainWordmark(
+                color = TitleRed,
+                fontSize = 48.sp,
+                letterSpacing = 2.sp,
+                animated = true
+            )
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // Subtitle
             Text(
-                text = "Value Different Things",
+                text = "Taking your team from the comfort zone to the trust zone!",
                 fontSize = 16.sp,
                 color = Color.White.copy(alpha = 0.8f),
-                modifier = Modifier.alpha(alpha)
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 32.dp)
             )
         }
     }
