@@ -139,12 +139,10 @@ failure.
 
 ## Gotchas
 
-- **Koin is only started on Android.** `LoopGainApplication.onCreate()` calls `initKoin()`;
-  `MainViewController` does not, so the first `koinViewModel()` or `get()` on iOS will throw.
-  Whoever introduces the first injected dependency needs to call `initKoin()` from the iOS entry
-  point too.
-- **`release.yml` triggers on `main`, but the default branch is `master`** — so the release
-  workflow does not currently fire on merge. Worth fixing deliberately; don't be surprised by it.
+- **Koin is started on both platforms.** `LoopGainApplication.onCreate()` calls `initKoin()` on
+  Android; `iosApp/iosApp/iOSApp.swift`'s `init()` calls `AppModuleKt.initKoin()` on iOS. If you
+  add a second KMP entry point, it needs the same call or the first `koinViewModel()`/`get()`
+  there will throw.
 - **`THEME.md` is partly wrong.** It prescribes white typography on every card. The printed
   deck uses **navy** text on the three light cards (white only on the navy Motto card), and it
   marks difficulty with **dots**, not stars — the spreadsheet's asterisks are just its notation.
@@ -159,7 +157,15 @@ failure.
 - The Firebase BOM is applied with `project.dependencies.platform(libs.firebase.bom.get())` in
   the KMP source-set block — the plain `platform(...)` accessor does not resolve there.
 - `settings.gradle.kts` enables `TYPESAFE_PROJECT_ACCESSORS` and includes `:iosApp`, which has
-  no build file (it's the Xcode wrapper).
+  no Gradle build file — it's the Xcode wrapper (`iosApp/iosApp.xcodeproj`, built with
+  `xcodebuild`/Xcode, not Gradle).
+- **`iosApp/iosApp.xcodeproj` is hand-authored, not exported from Xcode.** No CocoaPods, no
+  `xcodegen` — a single app target with a Run Script phase that invokes
+  `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode` to embed `ComposeApp.framework`. It
+  has not been opened/built in a real Xcode install as part of authoring it; `pr-checks.yml`'s
+  `ios-build` job and `release.yml`'s `release-ios` job are its first real verification. There is
+  no Apple Distribution signing configured — see `CI_CD.md`'s "iOS status" and "Apple signing
+  setup" sections before assuming a device-signed build or an App Store upload should work.
 
 ## Skills in this repo
 

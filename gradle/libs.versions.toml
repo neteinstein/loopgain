@@ -14,6 +14,7 @@ koin = "4.2.2"
 firebase-bom = "34.16.0"
 firebase-crashlytics-plugin = "3.0.8"
 google-services = "4.5.0"
+play-publisher = "4.1.1"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
@@ -54,3 +55,4 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "google-services" }
 firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-plugin" }
+playPublisher = { id = "com.github.triplet.play", version.ref = "play-publisher" }
