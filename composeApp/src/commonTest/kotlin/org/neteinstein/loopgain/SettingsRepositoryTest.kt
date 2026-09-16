@@ -19,9 +19,31 @@ class SettingsRepositoryTest {
 
     @Test
     fun defaultsToSystemThemeAndEnglish() {
-        val repo = DefaultSettingsRepository(FakeKeyValueStore())
+        val repo = DefaultSettingsRepository(FakeKeyValueStore(), systemLanguage = Language.EN)
         assertEquals(AppTheme.SYSTEM, repo.theme.value)
         assertEquals(Language.EN, repo.language.value)
+    }
+
+    @Test
+    fun fallsBackToTheDeviceSystemLanguageWhenNothingIsSaved() {
+        val repo = DefaultSettingsRepository(FakeKeyValueStore(), systemLanguage = Language.PT)
+        assertEquals(Language.PT, repo.language.value)
+    }
+
+    @Test
+    fun fallsBackToEnglishWhenTheSystemLanguageIsUnsupported() {
+        val repo = DefaultSettingsRepository(FakeKeyValueStore(), systemLanguage = null)
+        assertEquals(Language.EN, repo.language.value)
+    }
+
+    @Test
+    fun savedLanguagePreferenceOverridesTheSystemLanguage() {
+        val store = FakeKeyValueStore()
+        val first = DefaultSettingsRepository(store, systemLanguage = Language.EN)
+        first.setLanguage(Language.FR)
+
+        val second = DefaultSettingsRepository(store, systemLanguage = Language.PT)
+        assertEquals(Language.FR, second.language.value)
     }
 
     @Test
