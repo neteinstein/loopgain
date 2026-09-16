@@ -56,19 +56,22 @@ private val LightColorScheme = lightColorScheme(
     outline = Color(0xFFB7C6D6),
 )
 
+// Dark background/surface match SessionPaletteDark's Background/PanelBackground so the
+// Material-driven Settings screen reads as the same navy dark theme as the session flow, rather
+// than the generic near-black Material default.
 private val DarkColorScheme = darkColorScheme(
     primary = SkyBlue,
     secondary = Cerulean,
     tertiary = NavyBlue,
-    background = Color(0xFF1C1B1F),
-    surface = Color(0xFF1C1B1F),
+    background = Color(0xFF0B2B5C),
+    surface = Color(0xFF0F3466),
     onPrimary = NavyBlue,
     onSecondary = Color.White,
     onTertiary = Color.White,
     onBackground = Color(0xFFE6E1E5),
     onSurface = Color(0xFFE6E1E5),
     onSurfaceVariant = Color(0xFFA8B8C9),
-    outline = Color(0xFF49525C),
+    outline = Color(0xFF1E5FA8),
 )
 
 /** Resolves [AppTheme.SYSTEM] against the platform's current setting; [LIGHT]/[DARK] are explicit. */

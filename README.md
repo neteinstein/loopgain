@@ -8,11 +8,17 @@ LoopGain is built following modern Kotlin Multiplatform architecture, enabling c
 
 ### Features
 
-- ✅ **Shared UI**: Built with Compose Multiplatform for consistent UI across platforms
-- ✅ **Modern Architecture**: Clean architecture with dependency injection via Koin
-- ✅ **Firebase Integration**: Ready for Firebase Firestore database integration
-- ✅ **Brand Identity**: Custom LoopGain branding with themed loading screen
-- ✅ **Card Deck UI**: Interactive card deck interface with piled card design
+- ✅ **Timed Feedback Session**: Setup → Draw → Read → Write → Rounds → Reflect → Done, driven by a
+  shared session engine with a live countdown
+- ✅ **Adaptive Layout**: a phone "faithful deck" flow (one stage per screen) and a wide tablet
+  "facilitator board" (step tabs, reveal overlay, session history panel) sharing one view model
+- ✅ **48-Card Bundled Deck**: Motto, Positive Reinforcement, Improvements and Personal Question
+  cards, drawn with level filtering and "held back" history so recent cards don't repeat
+- ✅ **Bilingual**: English/Portuguese content and UI copy, with Spanish/French selectable in
+  Settings (falls back to English until PT-equivalent content exists)
+- ✅ **Settings**: theme switching (Light/Dark/System), language picker, and card-history reset
+- ✅ **Modern Architecture**: Koin-driven DI, an MVVM session view model over `StateFlow`, and a
+  Compose-free domain layer
 - ✅ **CI/CD Pipeline**: Automated testing, linting, and deployment workflows
 
 ## 🏗️ Project Structure
@@ -21,6 +27,9 @@ LoopGain is built following modern Kotlin Multiplatform architecture, enabling c
 loopgain/
 ├── composeApp/          # Shared KMP library module
 │   ├── commonMain/      # Shared business logic and UI
+│   │   ├── domain/      # model/ + session/ — pure Kotlin, no Compose types
+│   │   ├── data/        # repositories, local key-value store, bundled deck
+│   │   └── ui/          # screens/, components/, navigation/, theme/, viewmodel/
 │   ├── androidMain/     # Android-specific shared code
 │   └── iosMain/         # iOS-specific code
 ├── androidApp/          # Android app entry point (manifest, MainActivity, Firebase)
@@ -48,10 +57,18 @@ loopgain/
 
 #### iOS
 
+Open `iosApp/iosApp.xcodeproj` in Xcode and run, or build headlessly:
+
 ```bash
-cd iosApp
-xcodebuild -workspace iosApp.xcworkspace -scheme iosApp -configuration Debug
+xcodebuild build -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug \
+  -sdk iphonesimulator -destination "generic/platform=iOS Simulator" CODE_SIGNING_ALLOWED=NO
 ```
+
+The project has no CocoaPods dependency - a Run Script build phase invokes
+`./gradlew :composeApp:embedAndSignAppleFrameworkForXcode` to build and embed the shared
+`ComposeApp.framework`. There is no Apple Distribution signing configured yet, so this builds
+and runs on the simulator only; see [CI_CD.md](./CI_CD.md#ios-status-as-of-this-writing) for
+what's needed to sign and ship a real device build.
 
 ### Running Tests
 
@@ -78,17 +95,21 @@ xcodebuild -workspace iosApp.xcworkspace -scheme iosApp -configuration Debug
 
 ## 🎨 Design
 
-The app follows the LoopGain brand identity from [LoopGain.org](https://loopgain.org):
-
-- **Primary Color**: Dark Blue (#1E3A5F)
-- **Secondary Color**: Medium Blue (#4A90E2)
-- **Accent Color**: Light Blue (#7FB3D5)
-- **Typography**: Bold headers with generous letter spacing
+The app follows the physical LoopGain feedback deck's printed look: navy text on the three light
+category cards, white text on the navy Motto card, and difficulty marked with dots (not stars).
+Theme (Light/Dark/System) is switchable from Settings.
 
 ### Screens
 
-1. **Loading Screen**: Animated splash screen with LoopGain branding
-2. **Card Deck**: Main screen featuring piled cards with motivational content
+1. **Loading Screen**: animated splash screen with the LoopGain mark and wordmark
+2. **Session**: the timed feedback session — Setup, Draw, Read, Write, Rounds, Reflect, Done —
+   rendered as a one-stage-per-screen phone flow or, above ~840dp width, a single-screen tablet
+   facilitator board with step tabs and a session history panel
+3. **Settings**: theme, language, and card-history management
+
+> **Status**: there is no Home screen yet (the app goes straight from Loading into a session)
+> and no in-app Facilitator Guide. See [`docs/PLAN-main-screen-session-flow.md`](docs/PLAN-main-screen-session-flow.md)
+> for what's planned next, and [`AGENTS.md`](AGENTS.md) for contributor-facing notes.
 
 ## 🔧 Development
 
@@ -96,14 +117,20 @@ The app follows the LoopGain brand identity from [LoopGain.org](https://loopgain
 
 ```
 org.neteinstein.loopgain/
-├── ui/
-│   ├── theme/       # App theming and colors
-│   ├── screens/     # Screen composables
-│   ├── components/  # Reusable UI components
-│   └── navigation/  # Navigation logic
-├── data/            # Data layer (repositories, data sources)
-├── domain/          # Business logic (use cases, models)
-└── di/              # Dependency injection modules
+├── domain/
+│   ├── model/       # QuestionCard, CardCategory, CardLevel, SessionConfig, SessionStage, ...
+│   └── session/     # SessionEngine (pure state transitions) + SessionState
+├── data/
+│   ├── repository/  # CardRepository, SettingsRepository, SessionHistoryRepository
+│   ├── source/      # BundledDeck — the 48 cards
+│   └── local/       # KeyValueStore (expect/actual persistence)
+├── di/              # Koin module
+└── ui/
+    ├── theme/       # App theming and colors
+    ├── screens/     # Screen composables (loading, session/, session/tablet/, settings/)
+    ├── components/  # Reusable UI components (card face, level dots, pile tile, ...)
+    ├── viewmodel/   # SessionViewModel + UI state/copy
+    └── navigation/  # Navigation logic
 ```
 
 ### Adding Dependencies
@@ -117,33 +144,30 @@ The project uses GitHub Actions for automated testing, validation, and deploymen
 ### Workflows
 
 1. **PR Checks** (`pr-checks.yml`): Runs on pull requests
-   - Runs **in parallel**: Linting, Unit tests, UI tests
+   - Runs **in parallel**: Linting, Unit tests, UI tests, iOS simulator build (not yet required)
    - Automatic cancellation of outdated runs on new commits
-   - All checks must pass before merge
+   - Lint/Unit/UI must pass before merge
 
-2. **Release** (`release.yml`): Runs on merge to main
-   - Runs **in parallel**: Linting, Unit tests, UI tests, Snapshot tests
-   - Builds release APK/AAB only after all validations pass
-   - Creates GitHub release with artifacts
+2. **Release** (`release.yml`): Runs on push to `master` (the default branch)
+   - Re-runs lint + unit tests, then builds a **signed** APK/AAB and publishes a GitHub Release
+   - Auto-publishes to the Play Store's internal track if `ANDROID_PUBLISHER_CREDENTIALS` is set
+   - Attaches an **unsigned** iOS build (verification only, not installable) to the same release
 
 3. **Deploy to Stores** (`deploy-stores.yml`): Manual trigger
-   - Deploys to Google Play Store
-   - Deploys to Apple App Store
+   - Promotes an already-published Play Store release to another track (e.g. production)
+   - Builds a signed IPA and uploads it to App Store Connect (needs Apple signing secrets - not yet configured, see [CI_CD.md](./CI_CD.md))
 
 📖 **For detailed CI/CD documentation, see [CI_CD.md](./CI_CD.md)**
 
 ### Required Secrets
 
-For store deployment, configure these GitHub secrets:
+**Android release** (required): `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`
 
-- `KEYSTORE_BASE64`: Base64-encoded Android keystore
-- `KEYSTORE_PASSWORD`: Keystore password
-- `KEY_ALIAS`: Key alias
-- `KEY_PASSWORD`: Key password
-- `PLAY_STORE_SERVICE_ACCOUNT_JSON`: Google Play service account
-- `EXPORT_OPTIONS_PLIST`: iOS export options
-- `APP_STORE_CONNECT_API_KEY_ID`: App Store Connect API key ID
-- `APP_STORE_CONNECT_ISSUER_ID`: App Store Connect issuer ID
+**Android release** (optional): `GOOGLE_SERVICES_JSON_BASE64` (real Firebase config), `ANDROID_PUBLISHER_CREDENTIALS` (Play Console service account JSON, enables auto-publish + promotion)
+
+**iOS App Store deployment** (required, not yet configured): `BUILD_CERTIFICATE_BASE64`, `P12_PASSWORD`, `BUILD_PROVISION_PROFILE_BASE64`, `KEYCHAIN_PASSWORD`, `EXPORT_OPTIONS_PLIST`, `APP_STORE_CONNECT_API_KEY_ID`, `APP_STORE_CONNECT_ISSUER_ID`, `APP_STORE_CONNECT_API_KEY`
+
+Full details, including the one-time manual first Play Console upload and Apple signing setup, are in [CI_CD.md](./CI_CD.md).
 
 ## 📝 Firebase Setup
 
@@ -155,11 +179,9 @@ To enable Firebase features:
 
 ## 🧪 Testing
 
-The project includes:
-
-- **Unit Tests**: Common business logic tests
-- **UI Tests**: Compose UI testing for screens
-- **Integration Tests**: End-to-end feature testing
+Tests live in `commonTest` and run on the JVM via `./gradlew testDebugUnitTest` — this is what CI
+checks on every PR. Coverage includes the bundled deck, the session engine and its config math,
+session/settings repositories, language fallback, and navigation routes.
 
 ## 📄 License
 

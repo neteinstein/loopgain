@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.neteinstein.loopgain.data.local.KeyValueStore
+import org.neteinstein.loopgain.data.local.platformSystemLanguage
 import org.neteinstein.loopgain.domain.model.AppTheme
 import org.neteinstein.loopgain.domain.model.Language
 
@@ -15,14 +16,25 @@ interface SettingsRepository {
     fun setLanguage(language: Language)
 }
 
-class DefaultSettingsRepository(private val store: KeyValueStore) : SettingsRepository {
+/**
+ * [systemLanguage] seeds the very first launch's default when nothing is saved yet — the device's
+ * system language, mapped to a supported [Language] by [platformSystemLanguage]. It is a
+ * constructor parameter (rather than called inline) so tests can pin it instead of depending on
+ * the host's locale.
+ */
+class DefaultSettingsRepository(
+    private val store: KeyValueStore,
+    systemLanguage: Language? = platformSystemLanguage(),
+) : SettingsRepository {
     private val _theme = MutableStateFlow(
         store.getString(KEY_THEME)?.let { saved -> runCatching { AppTheme.valueOf(saved) }.getOrNull() } ?: AppTheme.SYSTEM,
     )
     override val theme: StateFlow<AppTheme> = _theme.asStateFlow()
 
     private val _language = MutableStateFlow(
-        store.getString(KEY_LANGUAGE)?.let { saved -> runCatching { Language.valueOf(saved) }.getOrNull() } ?: Language.EN,
+        store.getString(KEY_LANGUAGE)?.let { saved -> runCatching { Language.valueOf(saved) }.getOrNull() }
+            ?: systemLanguage
+            ?: Language.EN,
     )
     override val language: StateFlow<Language> = _language.asStateFlow()
 
