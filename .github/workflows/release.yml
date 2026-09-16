@@ -2,200 +2,257 @@ name: Release
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [ master ]
+  workflow_dispatch: {}
 
-# Default permissions for validation jobs
-permissions:
-  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  JAVA_VERSION: '17'
+  JAVA_DISTRIBUTION: 'temurin'
+  APP_VERSION_NAME: "1.0.${{ github.run_number }}"
 
 jobs:
-  # Linting job - runs independently
-  lint:
+  # Builds, signs and publishes the Android release. Creates the GitHub Release that
+  # release-ios (below) attaches its own artifact to.
+  release-android:
+    name: Build and publish Android release
     runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        cache: 'gradle'
-        
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
-    - name: Create placeholder google-services.json for CI
-      run: cp .github/ci/google-services.json.ci androidApp/google-services.json
-
-    - name: Run linting
-      run: ./gradlew lint --no-daemon
-      
-    - name: Upload lint reports
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: lint-reports
-        path: |
-          **/build/reports/lint-results*.html
-          **/build/reports/lint-results*.xml
-
-  # Unit tests job - runs in parallel with other jobs
-  unit-tests:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        cache: 'gradle'
-        
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
-    - name: Create placeholder google-services.json for CI
-      run: cp .github/ci/google-services.json.ci androidApp/google-services.json
-
-    - name: Run unit tests
-      run: ./gradlew testDebugUnitTest --no-daemon
-      
-    - name: Upload test reports
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: unit-test-reports
-        path: |
-          **/build/reports/tests/testDebugUnitTest/
-          **/build/test-results/testDebugUnitTest/
-
-  # UI/Instrumented tests job - runs in parallel with other jobs
-  ui-tests:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        cache: 'gradle'
-        
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
-    - name: Create placeholder google-services.json for CI
-      run: cp .github/ci/google-services.json.ci androidApp/google-services.json
-
-    - name: Run instrumented tests
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        api-level: 29
-        script: ./gradlew connectedDebugAndroidTest --no-daemon
-      
-    - name: Upload test reports
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: ui-test-reports
-        path: |
-          **/build/reports/androidTests/connected/
-          **/build/outputs/androidTest-results/
-
-  # Snapshot tests job - runs in parallel with other jobs
-  # Note: Currently configured with continue-on-error as Paparazzi may not be fully set up
-  snapshot-tests:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        cache: 'gradle'
-        
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
-    - name: Create placeholder google-services.json for CI
-      run: cp .github/ci/google-services.json.ci androidApp/google-services.json
-
-    - name: Run snapshot tests
-      run: ./gradlew verifyPaparazziDebug --no-daemon
-      continue-on-error: true
-      
-    - name: Upload snapshot test reports
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: snapshot-test-reports
-        path: |
-          **/build/reports/paparazzi/
-          **/out/failures/
-        if-no-files-found: ignore
-
-  # Build and release job - only runs after all validations pass
-  build-and-release:
-    runs-on: ubuntu-latest
-    needs: [lint, unit-tests, ui-tests, snapshot-tests]
-    # Grant write permissions for creating releases
     permissions:
       contents: write
-    
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        cache: 'gradle'
-        
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-      
-    - name: Build release APK
-      run: ./gradlew assembleRelease --no-daemon
-      
-    - name: Get version
-      id: version
-      run: |
-        echo "VERSION=$(grep 'versionName' androidApp/build.gradle.kts | awk -F'"' '{print $2}')" >> $GITHUB_OUTPUT
-        echo "BUILD=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
-        
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ steps.version.outputs.VERSION }}-${{ steps.version.outputs.BUILD }}
-        release_name: Release ${{ steps.version.outputs.VERSION }}
-        draft: false
-        prerelease: false
-        
-    - name: Upload APK to Release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./androidApp/build/outputs/apk/release/androidApp-release-unsigned.apk
-        asset_name: loopgain-${{ steps.version.outputs.VERSION }}.apk
-        asset_content_type: application/vnd.android.package-archive
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # Fail fast before spending CI time on lint/test/build if the signing secrets aren't set up.
+      - name: Validate required secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          missing=()
+          [ -z "$KEYSTORE_BASE64" ] && missing+=("KEYSTORE_BASE64")
+          [ -z "$KEYSTORE_PASSWORD" ] && missing+=("KEYSTORE_PASSWORD")
+          [ -z "$KEY_ALIAS" ] && missing+=("KEY_ALIAS")
+          [ -z "$KEY_PASSWORD" ] && missing+=("KEY_PASSWORD")
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::Missing required Action secrets: ${missing[*]}. See CI_CD.md for setup."
+            exit 1
+          fi
+
+      # Prefer the real Firebase config if it's been added as a secret; otherwise fall back to
+      # the CI-only placeholder so the workflow can still exercise lint/test/build (Firebase
+      # features will be non-functional in that build - see CI_CD.md).
+      - name: Set up google-services.json
+        env:
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON_BASE64" ]; then
+            echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > androidApp/google-services.json
+          else
+            echo "::warning::GOOGLE_SERVICES_JSON_BASE64 secret not set - using the CI placeholder. This release build's Firebase features (Crashlytics/Analytics/Firestore) will not work. See CI_CD.md."
+            cp .github/ci/google-services.json.ci androidApp/google-services.json
+          fi
+
+      # PR Checks (pr-checks.yml) validates the PR branch/merge ref, but a squash- or rebase-merge
+      # lands a commit on master that was never itself built or tested, so this is the only gate
+      # that actually covers the exact commit about to be released. UI tests (emulator) are left
+      # to pr-checks.yml - they're slow and this workflow needs to stay fast enough to run on
+      # every push to master.
+      - name: Run lint
+        run: ./gradlew lint --no-daemon --stacktrace
+
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest --no-daemon --stacktrace
+
+      - name: Decode signing keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
+
+      - name: Build signed release APK and AAB
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          APP_VERSION_CODE: ${{ github.run_number }}
+        run: ./gradlew assembleRelease bundleRelease --no-daemon --stacktrace
+
+      - name: Prepare release artifacts
+        id: artifact
+        run: |
+          APK_PATH="androidApp/build/outputs/apk/release/LoopGain_v${APP_VERSION_NAME}.apk"
+          mv androidApp/build/outputs/apk/release/androidApp-release.apk "$APK_PATH"
+          APK_SHA1=$(sha1sum "$APK_PATH" | awk '{print $1}')
+          echo "apk_path=$APK_PATH" >> "$GITHUB_OUTPUT"
+          echo "apk_sha1=$APK_SHA1" >> "$GITHUB_OUTPUT"
+
+          AAB_PATH="androidApp/build/outputs/bundle/release/LoopGain_v${APP_VERSION_NAME}.aab"
+          mv androidApp/build/outputs/bundle/release/androidApp-release.aab "$AAB_PATH"
+          AAB_SHA1=$(sha1sum "$AAB_PATH" | awk '{print $1}')
+          echo "aab_path=$AAB_PATH" >> "$GITHUB_OUTPUT"
+          echo "aab_sha1=$AAB_SHA1" >> "$GITHUB_OUTPUT"
+
+      - name: Determine release tag
+        id: version
+        run: echo "tag=v${APP_VERSION_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+          APK_PATH: ${{ steps.artifact.outputs.apk_path }}
+          APK_SHA1: ${{ steps.artifact.outputs.apk_sha1 }}
+          AAB_PATH: ${{ steps.artifact.outputs.aab_path }}
+          AAB_SHA1: ${{ steps.artifact.outputs.aab_sha1 }}
+        run: |
+          gh release create "$TAG" \
+            "$APK_PATH" \
+            "$AAB_PATH" \
+            --title "$TAG" \
+            --notes "**APK SHA-1:** \`${APK_SHA1}\`
+          **App Bundle (.aab) SHA-1:** \`${AAB_SHA1}\` - download this and upload it by hand in the Play Console for the app's first release; after that, publishReleaseBundle below takes over automatically. See CI_CD.md." \
+            --generate-notes
+
+      # The \`secrets\` context isn't available in step-level \`if:\` conditions, so the presence
+      # check has to happen here (env is allowed) and get passed along via a step output.
+      - name: Check Play publisher credentials
+        id: play_creds
+        env:
+          ANDROID_PUBLISHER_CREDENTIALS: ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}
+        run: echo "has_credentials=${{ env.ANDROID_PUBLISHER_CREDENTIALS != '' }}" >> "$GITHUB_OUTPUT"
+
+      # Optional: only runs once a Play Console service account key is configured (see
+      # CI_CD.md). Uploads the signed release App Bundle to the Play Console's "internal" track
+      # (or PLAY_TRACK, if set as a repo variable) via the Gradle Play Publisher plugin
+      # (androidApp/build.gradle.kts). Left off entirely until the secret exists so the workflow
+      # keeps producing GitHub Releases even before Play Console access is set up.
+      - name: Publish to Play Store
+        id: publish_play
+        if: steps.play_creds.outputs.has_credentials == 'true'
+        env:
+          ANDROID_PUBLISHER_CREDENTIALS: ${{ secrets.ANDROID_PUBLISHER_CREDENTIALS }}
+          PLAY_TRACK: ${{ vars.PLAY_TRACK }}
+          KEYSTORE_FILE: ${{ runner.temp }}/release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          APP_VERSION_CODE: ${{ github.run_number }}
+        run: ./gradlew publishReleaseBundle --no-daemon --stacktrace
+
+      # A 403 here is almost always the Play Console service account's standing (not invited to
+      # this app, no first manual release yet, API not enabled, or a still-propagating permission
+      # grant) rather than anything in this repo - see CI_CD.md's "Troubleshooting a 403" note.
+      - name: Play Store publish failure hint
+        if: failure() && steps.publish_play.outcome == 'failure'
+        run: |
+          echo "::error::publishReleaseBundle failed. If this was a 403/PERMISSION_DENIED from androidpublisher.googleapis.com, see 'Troubleshooting a 403 PERMISSION_DENIED' under Deploy to Stores in CI_CD.md - it is almost always the service account's Play Console permissions/app access, a missing first manual release, or the Android Publisher API not being enabled, not this workflow."
+
+      - name: Skip Play Store publish
+        if: steps.play_creds.outputs.has_credentials != 'true'
+        run: echo "::notice::ANDROID_PUBLISHER_CREDENTIALS secret not set - skipping Play Store publish. See CI_CD.md for setup."
+
+  # Builds an UNSIGNED iOS artifact and attaches it to the release created above, purely to
+  # verify the Compose Multiplatform framework still embeds and the app still compiles for a
+  # device architecture. It is not installable as-is (no provisioning profile/signature) and is
+  # NOT uploaded to App Store Connect - that needs real Apple signing secrets, which this repo
+  # does not have configured yet (see CI_CD.md). continue-on-error because the Xcode project
+  # (iosApp/iosApp.xcodeproj) is new and this job must not block the Android release while it's
+  # being proven out.
+  release-ios:
+    name: Build unsigned iOS artifact
+    runs-on: macos-latest
+    needs: release-android
+    continue-on-error: true
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # No signing identity or provisioning profile is configured, so this builds the .app for a
+      # real device architecture without code-signing it - it cannot be installed on a device as
+      # is. It exists to catch build breakage (the Kotlin/Native framework failing to embed, an
+      # iOS-only compile error) before it reaches a release, and to give testers a starting point
+      # they can re-sign locally. `xcodebuild archive` requires a valid signature even with
+      # CODE_SIGNING_ALLOWED=NO, so this uses `build` and packages the resulting .app by hand.
+      - name: Build unsigned iOS app
+        env:
+          APP_VERSION_CODE: ${{ github.run_number }}
+        run: |
+          xcodebuild build \
+            -project iosApp/iosApp.xcodeproj \
+            -scheme iosApp \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath "$RUNNER_TEMP/build" \
+            -destination "generic/platform=iOS" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            MARKETING_VERSION="${APP_VERSION_NAME}" \
+            CURRENT_PROJECT_VERSION="${APP_VERSION_CODE}" \
+            build
+
+      - name: Package unsigned IPA
+        id: artifact
+        run: |
+          APP_PATH="$RUNNER_TEMP/build/Build/Products/Release-iphoneos/iosApp.app"
+          PAYLOAD_DIR="$RUNNER_TEMP/Payload"
+          mkdir -p "$PAYLOAD_DIR"
+          cp -R "$APP_PATH" "$PAYLOAD_DIR/"
+
+          IPA_PATH="$RUNNER_TEMP/LoopGain_v${APP_VERSION_NAME}-unsigned.ipa"
+          (cd "$RUNNER_TEMP" && zip -qr "$IPA_PATH" "Payload")
+          IPA_SHA1=$(shasum -a 1 "$IPA_PATH" | awk '{print $1}')
+          echo "ipa_path=$IPA_PATH" >> "$GITHUB_OUTPUT"
+          echo "ipa_sha1=$IPA_SHA1" >> "$GITHUB_OUTPUT"
+
+      - name: Attach unsigned IPA to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.release-android.outputs.tag }}
+          IPA_PATH: ${{ steps.artifact.outputs.ipa_path }}
+          IPA_SHA1: ${{ steps.artifact.outputs.ipa_sha1 }}
+        run: |
+          gh release upload "$TAG" "$IPA_PATH"
+          gh release view "$TAG" --json body -q .body > "$RUNNER_TEMP/notes.md"
+          {
+            cat "$RUNNER_TEMP/notes.md"
+            echo ""
+            echo "**iOS (unsigned, not installable) SHA-1:** \`${IPA_SHA1}\` - build verification only. Re-sign with your own certificate/provisioning profile before installing on a device. See CI_CD.md."
+          } > "$RUNNER_TEMP/notes-updated.md"
+          gh release edit "$TAG" --notes-file "$RUNNER_TEMP/notes-updated.md"

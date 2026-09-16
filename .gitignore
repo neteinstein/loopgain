@@ -71,7 +71,8 @@ fastlane/readme.md
 *.klib
 
 # iOS
-*.xcodeproj
+# iosApp/iosApp.xcodeproj (incl. its shared xcshareddata/xcschemes) is committed intentionally so
+# CI can build it headlessly - only the per-user caches below are ignored.
 *.xcworkspace
 *.pbxuser
 *.mode1v3
@@ -86,6 +87,7 @@ DerivedData
 *.dSYM
 Pods/
 Podfile.lock
+GoogleService-Info.plist
 
 # macOS
 .DS_Store

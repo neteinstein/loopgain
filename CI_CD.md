@@ -10,155 +10,96 @@ The LoopGain project uses GitHub Actions for automated testing, validation, and 
 
 ### 1. PR Checks (`pr-checks.yml`)
 
-**Trigger:** 
+**Trigger:**
 - `pull_request` - Runs when pull requests are opened, synchronized (new commits pushed), or reopened
 
 **Purpose:** Validates code changes through automated testing and linting.
 
-**How it works:** The workflow automatically runs when a PR is created or updated, providing immediate feedback on code quality without duplicate runs.
-
 #### Jobs
 
-The workflow runs three validation jobs **in parallel** for faster feedback:
+Runs in **parallel** for faster feedback:
 
-1. **Lint Job**
-   - Runs Android/Kotlin linting
-   - Command: `./gradlew lint --no-daemon`
-   - Uploads lint reports as artifacts
+1. **Lint** - `./gradlew lint --no-daemon`, uploads lint reports as artifacts
+2. **Unit Tests** - `./gradlew testDebugUnitTest --no-daemon` (commonTest, on the JVM), uploads test reports
+3. **UI Tests** - instrumented Android tests via `reactivecircus/android-emulator-runner` (API 29), `./gradlew connectedDebugAndroidTest --no-daemon`
+4. **iOS Build** *(not yet a required check - see below)* - builds `iosApp/iosApp.xcodeproj` for the simulator SDK (`-sdk iphonesimulator`, no signing needed). Runs with `continue-on-error: true` because the Xcode project is a new, hand-authored scaffold with no track record in CI. Once it has run clean for a while, add `ios-build` to `pr-validation-summary`'s `needs` to make it required.
+5. **PR Validation Summary** - depends on `[lint, unit-tests, ui-tests]` and fails the check if any of those failed. New commits cancel in-progress runs for the same PR (`concurrency`).
 
-2. **Unit Tests Job**
-   - Runs unit tests for the debug build
-   - Command: `./gradlew testDebugUnitTest --no-daemon`
-   - Uploads test reports and results as artifacts
+### 2. Release (`release.yml`)
 
-3. **UI Tests Job**
-   - Runs instrumented Android tests on an emulator
-   - Uses Android Emulator Runner (API level 29)
-   - Command: `./gradlew connectedDebugAndroidTest --no-daemon`
-   - Uploads test reports as artifacts
-
-4. **PR Validation Summary Job**
-   - Runs after all other jobs complete
-   - Checks results of all validation jobs
-   - **Fails the PR check if any job fails**
-   - Provides a single status check for the PR
-
-#### Failure Handling
-
-- **Concurrency Control:** If new commits are pushed to the PR, in-progress workflow runs are automatically cancelled to save resources
-- **Job Dependencies:** The summary job depends on all validation jobs via `needs: [lint, unit-tests, ui-tests]`
-- **Fail Fast:** If any validation job fails, the summary job will fail, blocking the PR from being merged
-- **No `continue-on-error`:** All jobs must pass for the workflow to succeed (unlike the previous implementation)
-
-### 2. Release Workflow (`release.yml`)
-
-**Trigger:** 
-- Automatically when code is merged/pushed to `main` branch
+**Trigger:**
+- Push to `master` (the default branch)
 - Manually via `workflow_dispatch`
 
-**Purpose:** Runs comprehensive validations including snapshot tests, then builds and releases the application.
+**Purpose:** Builds a signed Android release, publishes a GitHub Release, optionally publishes to the Play Store, and builds an unsigned iOS artifact for verification.
 
-#### Jobs
+#### `release-android` job
 
-The workflow runs four validation jobs **in parallel**:
+1. **Validate required secrets** - fails fast if `KEYSTORE_BASE64` / `KEYSTORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD` are missing, before spending CI time on anything else.
+2. **Set up `google-services.json`** - decodes the `GOOGLE_SERVICES_JSON_BASE64` secret if set; otherwise falls back to the CI placeholder (`.github/ci/google-services.json.ci`) with a warning. A release built from the placeholder ships with non-functional Firebase (Crashlytics/Analytics/Firestore) - add the secret before relying on those features in a real release.
+3. **Lint + unit tests** - re-run here (not just relying on `pr-checks.yml`) because a squash- or rebase-merge can land a commit on `master` that was never itself built or tested. UI tests are *not* re-run - they're slow, and `pr-checks.yml` already covers them.
+4. **Build signed APK + AAB** - `./gradlew assembleRelease bundleRelease`, signed with the decoded keystore. `versionCode`/`versionName` come from `APP_VERSION_CODE` (the GitHub Actions run number) / `APP_VERSION_NAME` (`1.0.<run number>`) env vars, read in `androidApp/build.gradle.kts`; local/PR builds fall back to static defaults and debug signing.
+5. **Create GitHub Release** - tagged `v1.0.<run number>`, with the APK and AAB attached plus their SHA-1 hashes in the release notes.
+6. **Publish to Play Store** *(optional)* - only runs if `ANDROID_PUBLISHER_CREDENTIALS` is set, via the Gradle Play Publisher plugin's `publishReleaseBundle` task (`androidApp/build.gradle.kts`'s `play { }` block). Publishes to the `internal` track by default, overridable with the `PLAY_TRACK` repo variable. If unset, the step is skipped with a notice rather than failing - the workflow still produces a GitHub Release without Play Console access configured.
 
-1. **Lint Job**
-   - Same as PR checks
-   - Must pass before release
+   **Note:** the Play Developer API can only publish *updates* to an app that already has at least one release uploaded manually through the Play Console. Download the `.aab` asset from the GitHub Release and upload it by hand under Play Console → your app → Production/Testing → Create release for that one-time first upload; every release after that is handled automatically.
 
-2. **Unit Tests Job**
-   - Same as PR checks
-   - Must pass before release
+   **Troubleshooting a `403 PERMISSION_DENIED`:** the failing call is always the first one Gradle Play Publisher makes (`POST .../applications/<applicationId>/edits`), so the cause is the service account's standing in the Play Console, not this repo's Gradle config. Check, in order: (1) the service account (the `client_email` inside the `ANDROID_PUBLISHER_CREDENTIALS` JSON) is invited as a user under Play Console → Users and permissions, with access to *this specific app* and release permission for at least the target track; (2) a first release has been uploaded manually (see above); (3) the Google Play Android Developer API is enabled on the service account's Google Cloud project; (4) a newly-granted permission can take a few hours to propagate - a re-run after a short wait can resolve it with no config change.
 
-3. **UI Tests Job**
-   - Same as PR checks
-   - Must pass before release
+#### `release-ios` job
 
-4. **Snapshot Tests Job** ⭐ *New*
-   - Runs visual regression/snapshot tests
-   - Command: `./gradlew verifyPaparazziDebug --no-daemon`
-   - Currently configured with `continue-on-error: true` as snapshot tests may not be fully configured yet
-   - Uploads snapshot test reports and failure images
+Runs after `release-android` (`needs: release-android`), on `macos-latest`, with `continue-on-error: true` so it never blocks the Android release while the Xcode project is unproven.
 
-5. **Build and Release Job**
-   - **Only runs after all validation jobs pass** (`needs: [lint, unit-tests, ui-tests, snapshot-tests]`)
-   - Builds the release APK
-   - Extracts version information from `build.gradle.kts`
-   - Creates a GitHub release with version tag
-   - Uploads the APK as a release asset
-
-#### Workflow Flow
-
-```
-┌─────────┐  ┌──────────────┐  ┌──────────┐  ┌────────────────┐
-│  Lint   │  │  Unit Tests  │  │ UI Tests │  │ Snapshot Tests │
-└────┬────┘  └──────┬───────┘  └────┬─────┘  └───────┬────────┘
-     │              │               │                 │
-     └──────────────┴───────────────┴─────────────────┘
-                           │
-                    ┌──────▼──────┐
-                    │   Build &   │
-                    │   Release   │
-                    └─────────────┘
-```
+Builds `iosApp/iosApp.xcodeproj` **unsigned** for a real device architecture (`-sdk iphoneos`, `CODE_SIGNING_ALLOWED=NO`), packages the resulting `.app` into a zip named like an `.ipa` (`Payload/iosApp.app` inside a `.ipa`-suffixed zip), and attaches it to the same GitHub Release. This is **not installable as-is** - there is no provisioning profile or code signature - it exists purely to catch iOS build breakage (the Compose Multiplatform framework failing to embed, an iOS-only compile error) on every release and to give someone a starting point to re-sign locally. It is not uploaded to App Store Connect; that requires real Apple signing secrets (see `deploy-stores.yml` below), which this repo does not have configured yet.
 
 ### 3. Deploy to Stores (`deploy-stores.yml`)
 
-**Trigger:** Manual trigger only (`workflow_dispatch`)
+**Trigger:** Manual only (`workflow_dispatch`), with a `target` input: `playstore-promote`, `appstore`, or `both`.
 
-**Purpose:** Deploys the application to Google Play Store and/or Apple App Store.
+#### `promote-playstore` job
 
-This workflow is unchanged and remains available for production deployments.
+`release.yml` already auto-publishes every release to the Play Console's `internal` track. This job does not rebuild or re-upload anything - it promotes the artifact already sitting on `play_from_track` (input, default `internal`) to `play_to_track` (input, default `production`) via Gradle Play Publisher's `promoteReleaseArtifact` task. This is how a release actually reaches production. Requires `ANDROID_PUBLISHER_CREDENTIALS`.
 
-## Key Features
+#### `deploy-ios` job
 
-### ✅ Parallel Execution
-- All validation jobs run simultaneously, reducing total CI time
-- Jobs are independent and don't wait for each other
+Builds a **signed** archive, exports a real `.ipa`, and uploads it to App Store Connect via `altool`. This requires Apple Distribution signing, which is not set up in this repo yet - the job validates all required secrets up front and fails with a clear message (pointing back here) if any are missing, rather than failing deep in an `xcodebuild` invocation.
 
-### ✅ Automatic Cancellation
-- PR workflow uses concurrency groups to cancel outdated runs when new commits are pushed
-- Saves CI minutes and provides faster feedback
+**Apple signing setup (not done yet):** to make this job work you need, as repo secrets:
 
-### ✅ Comprehensive Testing
-- **PR Stage:** Linting, unit tests, and UI tests
-- **Main Branch:** All PR checks + snapshot tests
-- Each test type uploads detailed reports as artifacts
+- `BUILD_CERTIFICATE_BASE64` - a base64-encoded Apple Distribution `.p12` certificate (export from Keychain Access, or generate via a Certificate Signing Request in your Apple Developer account)
+- `P12_PASSWORD` - the password the `.p12` was exported with
+- `BUILD_PROVISION_PROFILE_BASE64` - a base64-encoded App Store distribution provisioning profile for `org.neteinstein.loopgain`, downloaded from the Apple Developer portal
+- `KEYCHAIN_PASSWORD` - any password; the workflow creates a throwaway keychain for the run and uses this to unlock it
+- `EXPORT_OPTIONS_PLIST` - base64-encoded `ExportOptions.plist` (method `app-store`, matching team ID)
+- `APP_STORE_CONNECT_API_KEY_ID`, `APP_STORE_CONNECT_ISSUER_ID`, `APP_STORE_CONNECT_API_KEY` (base64-encoded `.p8` key) - from App Store Connect → Users and Access → Keys
 
-### ✅ Fail-Safe Mechanisms
-- Summary job ensures all checks must pass
-- Build and release only happen after successful validations
-- Clear visibility into which jobs failed
-
-### ✅ Artifact Uploads
-All test results and reports are uploaded as artifacts for debugging:
-- Lint reports (HTML and XML)
-- Unit test reports and results
-- UI test reports
-- Snapshot test reports and failure images
+Until these exist, use `release.yml`'s unsigned iOS artifact (see above) for build verification only.
 
 ## Requirements
 
-### Secrets (for Deploy to Stores)
-The following GitHub secrets must be configured for store deployments:
+### Secrets
 
-- `KEYSTORE_BASE64` - Base64-encoded Android keystore
-- `KEYSTORE_PASSWORD` - Keystore password
-- `KEY_ALIAS` - Key alias
-- `KEY_PASSWORD` - Key password
-- `PLAY_STORE_SERVICE_ACCOUNT_JSON` - Google Play service account JSON
-- `EXPORT_OPTIONS_PLIST` - iOS export options plist
-- `APP_STORE_CONNECT_API_KEY_ID` - App Store Connect API key ID
-- `APP_STORE_CONNECT_ISSUER_ID` - App Store Connect issuer ID
+**Android release (`release.yml`, `release-android`) - required:**
+- `KEYSTORE_BASE64` - base64-encoded Android keystore (`.jks`/`.keystore`)
+- `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` - signing config credentials
+
+**Android release - optional:**
+- `GOOGLE_SERVICES_JSON_BASE64` - base64-encoded real `androidApp/google-services.json`. Without it, release builds use the CI placeholder and ship with non-functional Firebase.
+- `ANDROID_PUBLISHER_CREDENTIALS` - raw contents of a Play Console service account JSON key. Enables automatic publish to the `internal` track from `release.yml`, and is required by `deploy-stores.yml`'s `promote-playstore` job.
+- `PLAY_TRACK` (repo **variable**, not secret) - overrides the track `release.yml` auto-publishes to (default `internal`)
+
+**iOS App Store deployment (`deploy-stores.yml`, `deploy-ios`) - required, not yet configured:**
+- `BUILD_CERTIFICATE_BASE64`, `P12_PASSWORD`, `BUILD_PROVISION_PROFILE_BASE64`, `KEYCHAIN_PASSWORD`
+- `EXPORT_OPTIONS_PLIST`
+- `APP_STORE_CONNECT_API_KEY_ID`, `APP_STORE_CONNECT_ISSUER_ID`, `APP_STORE_CONNECT_API_KEY`
 
 ### Software Requirements
 - JDK 17
 - Gradle (via wrapper)
-- Android SDK (automatically installed by GitHub Actions)
+- Android SDK (automatically installed by GitHub Actions' Android runners)
+- Xcode (automatically available on GitHub Actions' `macos-latest` runners; pinned to `latest-stable` via `maxim-lobanov/setup-xcode`)
 
 ## Running Locally
-
-To run the same checks locally before pushing:
 
 ```bash
 # Linting
@@ -170,9 +111,16 @@ To run the same checks locally before pushing:
 # Instrumented tests (requires Android emulator or device)
 ./gradlew connectedDebugAndroidTest --no-daemon
 
-# Snapshot tests (if configured)
-./gradlew verifyPaparazziDebug --no-daemon
+# Signed release build (requires KEYSTORE_FILE/KEYSTORE_PASSWORD/KEY_ALIAS/KEY_PASSWORD env vars;
+# falls back to debug signing without them)
+./gradlew assembleRelease bundleRelease --no-daemon
+
+# iOS build (macOS only, requires full Xcode - not just Command Line Tools)
+xcodebuild build -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug \
+  -sdk iphonesimulator -destination "generic/platform=iOS Simulator" CODE_SIGNING_ALLOWED=NO
 ```
+
+See `.claude/skills/verify-build/` for what can be checked without a full Gradle build (e.g. from a cloud agent container, where `dl.google.com` is blocked and no Android SDK is installed).
 
 ## Viewing Results
 
@@ -183,56 +131,40 @@ To run the same checks locally before pushing:
 4. Download artifacts to view detailed reports
 
 ### Locally
-After running tests locally, reports are available in:
-- `composeApp/build/reports/lint-results*.html` - Lint reports
-- `composeApp/build/reports/tests/testDebugUnitTest/` - Unit test reports
-- `composeApp/build/reports/androidTests/connected/` - UI test reports
-- `composeApp/build/reports/paparazzi/` - Snapshot test reports
+- `androidApp/build/reports/lint-results*.html` - Lint reports
+- `composeApp/build/reports/tests/testDebugUnitTest/` - Unit test reports (commonTest runs on the JVM)
+- `androidApp/build/reports/androidTests/connected/` - UI test reports
 
 ## Troubleshooting
 
 ### A job failed, how do I debug?
 1. Check the job logs in the GitHub Actions UI
 2. Download the uploaded artifacts for detailed reports
-3. Run the same Gradle command locally to reproduce
+3. Run the same Gradle/xcodebuild command locally to reproduce
 
 ### PR is blocked, but I want to merge anyway?
-- This is intentional! All checks must pass to maintain code quality
-- Fix the failing tests/linting issues
-- If a check is incorrectly failing, investigate and fix the test
+This is intentional - `lint`, `unit-tests` and `ui-tests` must all pass. `ios-build` does not currently block merges (see above).
 
-### Snapshot tests are failing on main branch
-- The snapshot test job uses `continue-on-error: true` currently
-- This allows releases to proceed even if snapshot tests fail
-- Review the snapshot test reports to see what changed
-- Update snapshots if the changes are intentional
+### `release-ios` failed
+It's `continue-on-error: true` and does not block the Android release or the GitHub Release creation. Check the job logs - most failures will be either the Kotlin/Native framework failing to embed (`Compile Kotlin Framework` build phase) or an iOS-only Swift compile error.
 
-## Best Practices
+### Play Store publish / promote failed with a 403
+See the troubleshooting note under `release-android`'s "Publish to Play Store" step above.
 
-1. **Before creating a PR:** Run linting and tests locally
-2. **During PR review:** Check the uploaded test reports for detailed results
-3. **After merge:** Monitor the release workflow to ensure deployment succeeds
-4. **For releases:** Use the manual deploy-stores workflow only for production-ready versions
+## iOS status (as of this writing)
+
+`iosApp/iosApp.xcodeproj` was hand-authored (no CocoaPods, no `xcodegen` - just a single app target linking the `ComposeApp.framework` produced by `:composeApp:embedAndSignAppleFrameworkForXcode`) because this repo previously committed only the Swift source files and gitignored the actual Xcode project. It has not yet been built by a real Xcode install as part of authoring it - `pr-checks.yml`'s `ios-build` job and `release.yml`'s `release-ios` job are its first real verification, on GitHub's `macos-latest` runners. If either fails, that is expected until proven otherwise; fix forward rather than assuming the failure means something else is broken.
+
+There is no Apple Distribution signing configured, so nothing here can install on a real device or reach App Store Connect yet - see "Apple signing setup" above for what's needed.
 
 ## Future Improvements
 
-Potential enhancements to consider:
-
-- Add code coverage reporting and enforcement
-- Implement automatic snapshot baseline updates
-- Add performance benchmarking tests
 - Configure branch protection rules requiring status checks
+- Promote `ios-build` to a required PR check once proven stable
 - Add automated dependency updates (Dependabot)
 - Implement automatic changelog generation
-- Add iOS-specific testing workflows
-
-## Support
-
-For questions or issues with the CI/CD pipeline:
-1. Check the workflow logs in GitHub Actions
-2. Review this documentation
-3. Create an issue in the repository
+- Set up Apple Distribution signing (see "Apple signing setup" above) to enable real IPA builds and App Store Connect / TestFlight uploads
 
 ---
 
-Last Updated: 2026-01-15
+Last Updated: 2026-09-16
