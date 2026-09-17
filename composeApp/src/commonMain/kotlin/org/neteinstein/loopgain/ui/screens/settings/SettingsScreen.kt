@@ -297,7 +297,7 @@ private fun FooterLinks(language: Language, modifier: Modifier = Modifier) {
     val annotated = buildAnnotatedString {
         append(text)
         addUrlLink(text, "LoopGain", "https://loopgain.org", linkStyles)
-        addUrlLink(text, "Pedro Vicente", "https://pedrovicente.pt", linkStyles)
+        addUrlLink(text, "Pedro Vicente", "https://www.pedrovicente.pt", linkStyles)
     }
     Text(
         text = annotated,
