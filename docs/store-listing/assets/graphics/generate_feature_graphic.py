@@ -1,8 +1,10 @@
 import re
-import math
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
-W, H = 1024, 500
+W_OUT, H_OUT = 1024, 500
+SS = 4  # supersample factor — PIL's line/ellipse/text primitives are aliased, so draw this
+        # many times larger and downsample with LANCZOS at the end for smooth edges.
+W, H = W_OUT * SS, H_OUT * SS
 VIEWPORT = 108.0
 
 ARIAL = "/System/Library/Fonts/Supplemental/Arial.ttf"
@@ -85,48 +87,49 @@ def wrap_text(draw, text, font, max_width):
 
 
 # ---- one printed-deck card, as its own RGBA sprite (with room to rotate) ----
-CARD_W, CARD_H = 178, 246
-CARD_RADIUS = 16
+CARD_W, CARD_H = 178 * SS, 246 * SS
+CARD_RADIUS = 16 * SS
 
 
 def make_card(bg, fg, label_color, label, question, dots=None):
-    pad_canvas = 60  # room for rotation without clipping
+    pad_canvas = 60 * SS  # room for rotation without clipping
     size = (CARD_W + pad_canvas * 2, CARD_H + pad_canvas * 2)
     sprite = Image.new("RGBA", size, (0, 0, 0, 0))
-    d = ImageDraw.Draw(sprite)
+
     x0, y0 = pad_canvas, pad_canvas
     x1, y1 = x0 + CARD_W, y0 + CARD_H
 
     # soft shadow
     shadow = Image.new("RGBA", size, (0, 0, 0, 0))
     sd = ImageDraw.Draw(shadow)
-    sd.rounded_rectangle([x0 + 6, y0 + 10, x1 + 6, y1 + 10], radius=CARD_RADIUS, fill=(0, 0, 0, 90))
-    shadow = shadow.filter(__import__("PIL.ImageFilter", fromlist=["ImageFilter"]).GaussianBlur(8))
+    sd.rounded_rectangle([x0 + 6 * SS, y0 + 10 * SS, x1 + 6 * SS, y1 + 10 * SS],
+                          radius=CARD_RADIUS, fill=(0, 0, 0, 90))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(8 * SS))
     sprite = Image.alpha_composite(shadow, sprite)
     d = ImageDraw.Draw(sprite)
 
     d.rounded_rectangle([x0, y0, x1, y1], radius=CARD_RADIUS, fill=bg + (255,))
 
-    font_label = ImageFont.truetype(ARIAL_BOLD, 13)
-    d.text((x0 + 16, y0 + 17), label.upper(), font=font_label, fill=label_color + (255,))
+    font_label = ImageFont.truetype(ARIAL_BOLD, 13 * SS)
+    d.text((x0 + 16 * SS, y0 + 17 * SS), label.upper(), font=font_label, fill=label_color + (255,))
 
     if dots is not None:
-        r = 3.5
-        gap = 11
-        dy = y0 + 22
+        r = 3.5 * SS
+        gap = 11 * SS
+        dy = y0 + 22 * SS
         for i in range(3):
             color = label_color if i < dots else (label_color[0], label_color[1], label_color[2], 90)
-            cx = x1 - 16 - (2 - i) * gap
+            cx = x1 - 16 * SS - (2 - i) * gap
             fillc = color if len(color) == 4 else color + (255,)
             d.ellipse([cx - r, dy - r, cx + r, dy + r], fill=fillc)
 
-    font_q = ImageFont.truetype(ARIAL_BOLD, 18)
-    lines = wrap_text(d, question, font_q, CARD_W - 32)
-    line_h = 23
+    font_q = ImageFont.truetype(ARIAL_BOLD, 18 * SS)
+    lines = wrap_text(d, question, font_q, CARD_W - 32 * SS)
+    line_h = 23 * SS
     text_block_h = line_h * len(lines)
-    ty = y0 + CARD_H / 2 - text_block_h / 2 + 6
+    ty = y0 + CARD_H / 2 - text_block_h / 2 + 6 * SS
     for line in lines:
-        d.text((x0 + 16, ty), line, font=font_q, fill=fg + (255,))
+        d.text((x0 + 16 * SS, ty), line, font=font_q, fill=fg + (255,))
         ty += line_h
 
     return sprite, pad_canvas
@@ -174,34 +177,34 @@ cards = [
               "What's the best thing that happened this month?", dots=2),
 ]
 
-fan_center = (742, 300)
+fan_center = (742 * SS, 300 * SS)
 angles = [-16, -5.5, 5.5, 16]
-offsets = [(-152, 26), (-51, 6), (51, 6), (152, 26)]
+offsets = [(-152 * SS, 26 * SS), (-51 * SS, 6 * SS), (51 * SS, 6 * SS), (152 * SS, 26 * SS)]
 for (sprite, pad), angle, (ox, oy) in zip(cards, angles, offsets):
     paste_rotated(img, sprite, pad, (fan_center[0] + ox, fan_center[1] + oy), angle)
 
 # ---- left side: mark + wordmark + tagline, left aligned ----
 draw = ImageDraw.Draw(img)
-mark_scale = 3.6
+mark_scale = 3.6 * SS
 mark_w = (BBOX_W + 13.0) * mark_scale
 mark_h = (BBOX_H + 13.0) * mark_scale
 
-font_word = ImageFont.truetype(ARIAL_BOLD, 74)
+font_word = ImageFont.truetype(ARIAL_BOLD, 74 * SS)
 word_text = "LoopGain"
 wb = draw.textbbox((0, 0), word_text, font=font_word)
 word_w = wb[2] - wb[0]
 word_h = wb[3] - wb[1]
 
-font_tag = ImageFont.truetype(ARIAL, 25)
+font_tag = ImageFont.truetype(ARIAL, 25 * SS)
 tagline1 = "Structured feedback sessions"
 tagline2 = "for teams — timed & kind."
 tb1 = draw.textbbox((0, 0), tagline1, font=font_tag)
 tb2 = draw.textbbox((0, 0), tagline2, font=font_tag)
 
-left_x = 58
-gap1, gap2, gap3 = 20, 22, 10
+left_x = 58 * SS
+gap1, gap2, gap3 = 20 * SS, 22 * SS, 10 * SS
 total_h = mark_h + gap1 + word_h + gap2 + (tb1[3] - tb1[1]) + gap3 + (tb2[3] - tb2[1])
-top_y = (H - total_h) / 2 - 6
+top_y = (H - total_h) / 2 - 6 * SS
 
 draw_mark(draw, left_x, top_y, mark_scale)
 
@@ -209,9 +212,11 @@ word_y = top_y + mark_h + gap1 - wb[1]
 draw.text((left_x, word_y), word_text, font=font_word, fill=(0xE5, 0x34, 0x2F, 255))
 
 tag_y1 = word_y + word_h + wb[1] + gap2 - tb1[1]
-draw.text((left_x + 2, tag_y1), tagline1, font=font_tag, fill=(255, 255, 255, 235))
+draw.text((left_x + 2 * SS, tag_y1), tagline1, font=font_tag, fill=(255, 255, 255, 235))
 tag_y2 = tag_y1 + (tb1[3] - tb1[1]) + gap3 - tb2[1] + tb1[1]
-draw.text((left_x + 2, tag_y2), tagline2, font=font_tag, fill=(255, 255, 255, 235))
+draw.text((left_x + 2 * SS, tag_y2), tagline2, font=font_tag, fill=(255, 255, 255, 235))
+
+img = img.resize((W_OUT, H_OUT), Image.LANCZOS)
 
 import os
 out_path = os.path.join(os.path.dirname(__file__), "feature_graphic_1024x500.png")

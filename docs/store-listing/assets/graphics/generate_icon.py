@@ -3,7 +3,10 @@ from PIL import Image, ImageDraw
 
 VIEWPORT = 108.0
 OUT = 512
-SCALE = OUT / VIEWPORT
+SS = 4  # supersample factor — PIL's line/ellipse primitives are aliased, so render this many
+         # times larger and downsample with LANCZOS at the end for smooth (anti-aliased) edges.
+RENDER = OUT * SS
+SCALE = RENDER / VIEWPORT
 STROKE = 13.0 * SCALE
 BG = (13, 34, 84, 255)  # #0D2254
 
@@ -61,10 +64,12 @@ def draw_path(draw, path_d, grad):
     )
 
 
-img = Image.new("RGBA", (OUT, OUT), BG)
+img = Image.new("RGBA", (RENDER, RENDER), BG)
 draw = ImageDraw.Draw(img)
 draw_path(draw, RIGHT_PATH, RIGHT_GRAD)
 draw_path(draw, LEFT_PATH, LEFT_GRAD)
+
+img = img.resize((OUT, OUT), Image.LANCZOS)
 
 import os
 out_path = os.path.join(os.path.dirname(__file__), "icon_512.png")
