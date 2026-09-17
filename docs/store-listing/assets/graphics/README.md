@@ -8,8 +8,11 @@ Both files here are generated, not hand-drawn, from the app's own brand source:
   `ic_launcher_background.xml` at full resolution, rather than upscaling the small
   (max 192×192) launcher PNGs in `androidApp/src/main/res/mipmap-*`.
 - `generate_feature_graphic.py` → `feature_graphic_1024x500.png` (Play Console feature
-  graphic). Same mark, plus the `LoopGainWordmark` red and the loading-screen's blue gradient
-  and tagline (`LoadingScreen.kt`), laid out as a static banner.
+  graphic). Same mark and the loading-screen's blue gradient and tagline (`LoadingScreen.kt`)
+  on the left; on the right, a fanned hand of four cards using the exact category colors and
+  label tints from `CardStyles.kt` (`CardColors.Motto`/`PositiveReinforcement`/`Improvements`/
+  `PersonalQuestion`), each with real deck question text, to make the graphic read as "a card
+  deck app" at a glance instead of a plain logo lockup.
 
 Re-run either script (`python3 generate_icon.py`) after the launcher icon or brand colors
 change, from inside this directory — each writes its PNG next to itself. Both need Pillow
