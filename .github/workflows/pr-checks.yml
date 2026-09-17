@@ -144,6 +144,23 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
+    - name: Find an available iOS simulator
+      id: simulator
+      run: |
+        UDID=$(xcrun simctl list devices available -j | python3 -c '
+        import json, sys
+        data = json.load(sys.stdin)["devices"]
+        for runtime, devices in data.items():
+            if "iOS" not in runtime:
+                continue
+            for d in devices:
+                if d["isAvailable"] and d["name"].startswith("iPhone"):
+                    print(d["udid"])
+                    sys.exit(0)
+        sys.exit(1)
+        ')
+        echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
     - name: Build iOS app for simulator
       run: |
         xcodebuild build \
@@ -151,7 +168,7 @@ jobs:
           -scheme iosApp \
           -configuration Debug \
           -sdk iphonesimulator \
-          -destination "generic/platform=iOS Simulator" \
+          -destination "id=${{ steps.simulator.outputs.udid }}" \
           CODE_SIGNING_ALLOWED=NO
 
   # Summary job - requires all jobs to pass
