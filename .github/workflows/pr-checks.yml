@@ -169,7 +169,22 @@ jobs:
           -configuration Debug \
           -sdk iphonesimulator \
           -destination "id=${{ steps.simulator.outputs.udid }}" \
-          CODE_SIGNING_ALLOWED=NO
+          CODE_SIGNING_ALLOWED=YES \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGN_IDENTITY=- \
+          CODE_SIGN_STYLE=Manual \
+          AD_HOC_CODE_SIGNING_ALLOWED=YES
+
+    - name: Diagnose generated ComposeApp.framework header
+      if: always()
+      run: |
+        echo "--- ComposeApp.framework locations ---"
+        find . ~/Library/Developer/Xcode/DerivedData -iname "ComposeApp.framework" -type d 2>/dev/null
+        echo "--- header contents (initKoin / AppModuleKt) ---"
+        find . ~/Library/Developer/Xcode/DerivedData -iname "ComposeApp.h" 2>/dev/null | while read -r h; do
+          echo "== $h =="
+          grep -n "initKoin\|AppModuleKt" "$h" || echo "(no match)"
+        done
 
   # Summary job - requires all jobs to pass
   # This enforces that if any job fails, the PR check fails
