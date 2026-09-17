@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -82,11 +84,12 @@ fun TabletRoundsScreen(
                 )
                 Text(
                     text = state.turnPhaseLabel,
-                    color = if (isFeedbackPhase) LocalSessionColors.current.Accent else LocalSessionColors.current.Background,
+                    color = if (isFeedbackPhase) LocalSessionColors.current.OnAccent else LocalSessionColors.current.Background,
                     fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold,
                     letterSpacing = 1.4.sp,
                     modifier = Modifier
-                        .background(if (isFeedbackPhase) LocalSessionColors.current.PanelBackground else LocalSessionColors.current.Ink)
+                        .background(if (isFeedbackPhase) LocalSessionColors.current.Accent else LocalSessionColors.current.Ink)
                         .padding(horizontal = 13.dp, vertical = 9.dp),
                 )
                 Column(
@@ -134,13 +137,19 @@ fun TabletRoundsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 16.dp)
-                            .background(LocalSessionColors.current.Ink)
+                            .background(org.neteinstein.loopgain.ui.theme.TitleRed)
                             .padding(16.dp),
                     ) {
-                        Text(text = SessionCopy.fiveMinutesLeft(state.language), color = LocalSessionColors.current.Background, fontSize = 10.sp, letterSpacing = 1.6.sp)
+                        Text(
+                            text = SessionCopy.fiveMinutesLeft(state.language),
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 1.6.sp,
+                        )
                         Text(
                             text = SessionCopy.finishTurnNote(state.language),
-                            color = LocalSessionColors.current.PanelBackground,
+                            color = Color.White.copy(alpha = 0.88f),
                             fontSize = 13.sp,
                             lineHeight = 18.sp,
                             modifier = Modifier.padding(top = 7.dp),
@@ -181,11 +190,18 @@ private fun TabletOrderRow(row: OrderRowUi, modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .background(if (row.isCurrent) LocalSessionColors.current.PanelBackground else Color.Transparent)
-            .border(1.dp, if (row.isCurrent) LocalSessionColors.current.Accent else Color.Transparent)
             .padding(horizontal = 13.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        if (row.isCurrent) {
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier
+                    .size(7.dp)
+                    .clip(androidx.compose.foundation.shape.CircleShape)
+                    .background(LocalSessionColors.current.Accent),
+            )
+        }
         Text(text = "${row.index}", color = LocalSessionColors.current.MutedSecondary, fontSize = 11.sp, modifier = Modifier.width(16.dp))
         Text(
             text = row.name,
@@ -208,8 +224,8 @@ private fun TabletActiveCardRow(card: CardFaceUi, modifier: Modifier = Modifier)
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .border(1.dp, LocalSessionColors.current.Border)
-            .background(Color.White)
+            .border(1.dp, style.containerColor.copy(alpha = 0.4f))
+            .background(style.containerColor.copy(alpha = 0.14f))
             .padding(18.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(20.dp),
@@ -217,14 +233,14 @@ private fun TabletActiveCardRow(card: CardFaceUi, modifier: Modifier = Modifier)
         Column(modifier = Modifier.width(120.dp)) {
             Text(
                 text = card.label.uppercase(),
-                color = style.labelColor,
+                color = style.containerColor,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 1.4.sp,
             )
             LevelDots(
                 level = card.level,
-                activeColor = style.labelColor,
+                activeColor = style.containerColor,
                 inactiveColor = LocalSessionColors.current.Disabled,
                 modifier = Modifier.padding(top = 9.dp),
             )
