@@ -233,13 +233,13 @@ private fun TabletHeader(
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             if (showClock) {
                 Row(
-                    modifier = Modifier.border(1.dp, LocalSessionColors.current.Accent).padding(horizontal = 13.dp, vertical = 8.dp),
+                    modifier = Modifier.background(LocalSessionColors.current.Accent).padding(horizontal = 13.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(9.dp),
                 ) {
                     Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(LocalSessionColors.current.AccentBright))
-                    Text(text = clock, color = LocalSessionColors.current.Ink, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
-                    Text(text = clockSuffix, color = LocalSessionColors.current.MutedLabel, fontSize = 9.sp, letterSpacing = 1.6.sp)
+                    Text(text = clock, color = LocalSessionColors.current.OnAccent, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+                    Text(text = clockSuffix, color = LocalSessionColors.current.OnAccent.copy(alpha = 0.75f), fontSize = 9.sp, letterSpacing = 1.6.sp)
                 }
             }
             OutlinedButton(
@@ -271,14 +271,20 @@ private fun TabletStepTabs(currentStage: SessionStage, language: org.neteinstein
                 modifier = Modifier
                     .weight(1f)
                     .border(width = 1.dp, color = LocalSessionColors.current.Border)
-                    .background(if (isCurrent) LocalSessionColors.current.Ink else Color.Transparent)
+                    .background(
+                        when {
+                            isCurrent -> LocalSessionColors.current.Ink
+                            isDone -> LocalSessionColors.current.Accent.copy(alpha = 0.1f)
+                            else -> Color.Transparent
+                        }
+                    )
                     .padding(horizontal = 14.dp, vertical = 13.dp),
                 horizontalArrangement = Arrangement.spacedBy(9.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = (index + 1).toString().padStart(2, '0'),
-                    color = if (isCurrent) LocalSessionColors.current.AccentBright else LocalSessionColors.current.MutedSecondary,
+                    text = if (isDone) "✓" else (index + 1).toString().padStart(2, '0'),
+                    color = if (isCurrent) LocalSessionColors.current.AccentBright else if (isDone) LocalSessionColors.current.Accent else LocalSessionColors.current.MutedSecondary,
                     fontSize = 10.sp,
                 )
                 Text(

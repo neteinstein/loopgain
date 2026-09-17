@@ -26,8 +26,8 @@ fun PileTile(pile: PileUi, language: Language, onTap: () -> Unit, modifier: Modi
     Column(
         modifier = modifier
             .fillMaxSize()
-            .border(1.dp, if (pile.isDrawn) swatch else LocalSessionColors.current.Border)
-            .background(if (pile.isDrawn) LocalSessionColors.current.Background else LocalSessionColors.current.PanelBackground)
+            .border(1.dp, swatch.copy(alpha = if (pile.isDrawn) 0.55f else 0.3f))
+            .background(swatch.copy(alpha = if (pile.isDrawn) 0.2f else 0.1f))
             .clickable(onClick = onTap)
             .padding(11.dp),
         verticalArrangement = Arrangement.SpaceBetween,

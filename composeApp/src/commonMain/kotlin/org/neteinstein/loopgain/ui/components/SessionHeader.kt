@@ -37,7 +37,7 @@ fun SessionHeader(
             .fillMaxWidth()
             .background(LocalSessionColors.current.Background)
             .windowInsetsPadding(WindowInsets.statusBars)
-            .border(width = 0.dp, color = LocalSessionColors.current.Border)
+            .border(width = 1.dp, color = LocalSessionColors.current.Border)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -60,14 +60,14 @@ fun SessionHeader(
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (running) {
                 Row(
-                    modifier = Modifier.border(1.dp, LocalSessionColors.current.Accent).padding(horizontal = 9.dp, vertical = 5.dp),
+                    modifier = Modifier.background(LocalSessionColors.current.Accent).padding(horizontal = 9.dp, vertical = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(7.dp),
                 ) {
                     androidx.compose.foundation.layout.Box(
                         modifier = Modifier.size(5.dp).clip(CircleShape).background(LocalSessionColors.current.AccentBright),
                     )
-                    Text(text = clock, color = LocalSessionColors.current.Ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                    Text(text = clock, color = LocalSessionColors.current.OnAccent, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
             IconButton(onClick = onSettingsClick) {

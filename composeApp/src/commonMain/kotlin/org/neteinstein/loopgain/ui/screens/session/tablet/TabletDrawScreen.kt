@@ -116,12 +116,20 @@ fun TabletDrawScreen(
 
 @Composable
 private fun TabletPileTile(pile: PileUi, language: org.neteinstein.loopgain.domain.model.Language, onTap: () -> Unit, modifier: Modifier = Modifier) {
-    val swatch = CardStyles.forCategory(pile.category).containerColor
+    val style = CardStyles.forCategory(pile.category)
+    val isMotto = pile.category == CardCategory.MOTTO
+    // Motto prints as a solid navy card on the physical deck (no levels); the three light
+    // categories get a wash of their own color instead of a plain gray box with a colored strip.
+    val tileBackground = if (isMotto) style.containerColor else style.containerColor.copy(alpha = if (pile.isDrawn) 0.24f else 0.16f)
+    val labelColor = if (isMotto) style.labelColor else style.containerColor
+    val bodyTextColor = if (isMotto) androidx.compose.ui.graphics.Color.White else LocalSessionColors.current.Ink
+    val mutedOnTile = if (isMotto) androidx.compose.ui.graphics.Color.White.copy(alpha = 0.65f) else LocalSessionColors.current.MutedSecondary
+    val circleColor = if (isMotto) LocalSessionColors.current.AccentBright else LocalSessionColors.current.Accent
     Column(
         modifier = modifier
             .aspectRatio(0.78f)
             .border(1.dp, if (pile.isDrawn) LocalSessionColors.current.Accent else LocalSessionColors.current.Border)
-            .background(if (pile.isDrawn) LocalSessionColors.current.Background else LocalSessionColors.current.PanelBackground)
+            .background(tileBackground)
             .clickable(onClick = onTap)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -131,28 +139,28 @@ private fun TabletPileTile(pile: PileUi, language: org.neteinstein.loopgain.doma
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
                     text = pile.label.uppercase(),
-                    color = swatch,
+                    color = labelColor,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 1.2.sp,
                 )
-                Text(text = pile.code.orEmpty(), color = LocalSessionColors.current.MutedLabel, fontSize = 10.sp)
+                Text(text = pile.code.orEmpty(), color = mutedOnTile, fontSize = 10.sp)
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = pile.code ?: "",
-                    color = LocalSessionColors.current.Ink,
+                    color = bodyTextColor,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = SessionCopy.drawnTapToReadAgain(language),
-                    color = LocalSessionColors.current.MutedSecondary,
+                    color = mutedOnTile,
                     fontSize = 10.sp,
                     modifier = Modifier.padding(top = 6.dp),
                 )
             }
-            LevelDots(level = pile.level, activeColor = swatch, inactiveColor = LocalSessionColors.current.Disabled)
+            LevelDots(level = pile.level, activeColor = labelColor, inactiveColor = mutedOnTile.copy(alpha = 0.4f))
         } else {
             Column(
                 modifier = Modifier.weight(1f),
@@ -160,14 +168,14 @@ private fun TabletPileTile(pile: PileUi, language: org.neteinstein.loopgain.doma
                 verticalArrangement = Arrangement.Center,
             ) {
                 androidx.compose.foundation.layout.Box(
-                    modifier = Modifier.size(58.dp).border(1.dp, LocalSessionColors.current.Accent, CircleShape).clip(CircleShape),
+                    modifier = Modifier.size(58.dp).border(1.dp, circleColor, CircleShape).clip(CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(text = "∞", color = LocalSessionColors.current.Accent, fontSize = 26.sp)
+                    Text(text = "∞", color = circleColor, fontSize = 26.sp)
                 }
                 Text(
                     text = pile.label.uppercase(),
-                    color = swatch,
+                    color = labelColor,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 1.2.sp,
@@ -175,13 +183,13 @@ private fun TabletPileTile(pile: PileUi, language: org.neteinstein.loopgain.doma
                 )
                 Text(
                     text = SessionCopy.pileAvailabilityLabel(false, pile.availableCount, pile.heldBackCount, language),
-                    color = LocalSessionColors.current.MutedLabel,
+                    color = mutedOnTile,
                     fontSize = 11.sp,
                     modifier = Modifier.padding(top = 4.dp),
                 )
                 Text(
                     text = SessionCopy.tapToDraw(language),
-                    color = LocalSessionColors.current.Accent,
+                    color = circleColor,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 1.6.sp,
