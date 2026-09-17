@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,11 +52,12 @@ fun SessionRoundsScreen(
             )
             Text(
                 text = state.turnPhaseLabel,
-                color = LocalSessionColors.current.Accent,
+                color = LocalSessionColors.current.OnAccent,
                 fontSize = 10.sp,
+                fontWeight = FontWeight.SemiBold,
                 letterSpacing = 1.2.sp,
                 modifier = Modifier
-                    .background(LocalSessionColors.current.PanelBackground)
+                    .background(LocalSessionColors.current.Accent)
                     .padding(horizontal = 10.dp, vertical = 7.dp),
             )
 
@@ -81,16 +84,17 @@ fun SessionRoundsScreen(
                 verticalArrangement = Arrangement.spacedBy(7.dp),
             ) {
                 state.activeCards.forEach { card ->
-                    val labelColor = CardStyles.forCategory(card.category).containerColor
+                    val swatch = CardStyles.forCategory(card.category).containerColor
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .border(1.dp, LocalSessionColors.current.Border)
+                            .border(1.dp, swatch.copy(alpha = 0.4f))
+                            .background(swatch.copy(alpha = 0.14f))
                             .padding(12.dp),
                     ) {
                         Text(
                             text = card.label.uppercase(),
-                            color = labelColor,
+                            color = swatch,
                             fontSize = 9.sp,
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = 1.2.sp,
@@ -119,11 +123,18 @@ fun SessionRoundsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(if (row.isCurrent) LocalSessionColors.current.PanelBackground else androidx.compose.ui.graphics.Color.Transparent)
-                            .border(1.dp, if (row.isCurrent) LocalSessionColors.current.Accent else androidx.compose.ui.graphics.Color.Transparent)
                             .padding(horizontal = 11.dp, vertical = 9.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
+                        if (row.isCurrent) {
+                            androidx.compose.foundation.layout.Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(androidx.compose.foundation.shape.CircleShape)
+                                    .background(LocalSessionColors.current.Accent),
+                            )
+                        }
                         Text(text = "${row.index}", color = LocalSessionColors.current.MutedSecondary, fontSize = 10.sp)
                         Text(
                             text = row.name,
@@ -141,13 +152,19 @@ fun SessionRoundsScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(LocalSessionColors.current.Ink)
+                    .background(org.neteinstein.loopgain.ui.theme.TitleRed)
                     .padding(horizontal = 16.dp, vertical = 11.dp),
             ) {
-                Text(text = SessionCopy.fiveMinutesLeft(state.language), color = LocalSessionColors.current.Background, fontSize = 10.sp, letterSpacing = 1.6.sp)
+                Text(
+                    text = SessionCopy.fiveMinutesLeft(state.language),
+                    color = androidx.compose.ui.graphics.Color.White,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 1.6.sp,
+                )
                 Text(
                     text = SessionCopy.finishTurnNote(state.language),
-                    color = LocalSessionColors.current.PanelBackground,
+                    color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.88f),
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 5.dp),
                 )

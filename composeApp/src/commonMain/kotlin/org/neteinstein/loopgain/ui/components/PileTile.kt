@@ -45,8 +45,8 @@ private fun FaceDownPileTile(pile: PileUi, language: Language, modifier: Modifie
     val swatch = CardStyles.forCategory(pile.category).containerColor
     Column(
         modifier = modifier
-            .border(1.dp, LocalSessionColors.current.Border)
-            .background(LocalSessionColors.current.PanelBackground)
+            .border(1.dp, swatch.copy(alpha = 0.3f))
+            .background(swatch.copy(alpha = 0.1f))
             .padding(11.dp),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {

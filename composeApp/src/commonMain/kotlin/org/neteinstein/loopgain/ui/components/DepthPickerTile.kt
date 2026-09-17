@@ -34,7 +34,8 @@ fun DepthPickerTile(
     val swatch = CardStyles.forCategory(depth.category).containerColor
     Column(
         modifier = modifier
-            .border(1.dp, LocalSessionColors.current.Border)
+            .border(1.dp, swatch.copy(alpha = 0.35f))
+            .background(swatch.copy(alpha = 0.1f))
             .padding(8.dp),
     ) {
         androidx.compose.foundation.layout.Box(

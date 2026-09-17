@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -129,24 +130,31 @@ private fun TabletPileTile(pile: PileUi, language: Language, onTap: () -> Unit, 
 
 @Composable
 private fun TabletFaceDownPileTile(pile: PileUi, language: Language, modifier: Modifier = Modifier) {
-    val swatch = CardStyles.forCategory(pile.category).containerColor
+    val style = CardStyles.forCategory(pile.category)
+    val isMotto = pile.category == CardCategory.MOTTO
+    // Motto prints as a solid navy card on the physical deck (no levels); the three light
+    // categories get a wash of their own color instead of a plain gray box with a colored strip.
+    val tileBackground = if (isMotto) style.containerColor else style.containerColor.copy(alpha = 0.16f)
+    val labelColor = if (isMotto) style.labelColor else style.containerColor
+    val mutedOnTile = if (isMotto) Color.White.copy(alpha = 0.65f) else LocalSessionColors.current.MutedSecondary
+    val circleColor = if (isMotto) LocalSessionColors.current.AccentBright else LocalSessionColors.current.Accent
     Column(
         modifier = modifier
             .border(1.dp, LocalSessionColors.current.Border)
-            .background(LocalSessionColors.current.PanelBackground)
+            .background(tileBackground)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         androidx.compose.foundation.layout.Box(
-            modifier = Modifier.size(58.dp).border(1.dp, LocalSessionColors.current.Accent, CircleShape).clip(CircleShape),
+            modifier = Modifier.size(58.dp).border(1.dp, circleColor, CircleShape).clip(CircleShape),
             contentAlignment = Alignment.Center,
         ) {
-            Text(text = "∞", color = LocalSessionColors.current.Accent, fontSize = 26.sp)
+            Text(text = "∞", color = circleColor, fontSize = 26.sp)
         }
         Text(
             text = pile.label.uppercase(),
-            color = swatch,
+            color = labelColor,
             fontSize = 10.sp,
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 1.2.sp,
@@ -154,13 +162,13 @@ private fun TabletFaceDownPileTile(pile: PileUi, language: Language, modifier: M
         )
         Text(
             text = SessionCopy.pileAvailabilityLabel(false, pile.availableCount, pile.heldBackCount, language),
-            color = LocalSessionColors.current.MutedLabel,
+            color = mutedOnTile,
             fontSize = 11.sp,
             modifier = Modifier.padding(top = 4.dp),
         )
         Text(
             text = SessionCopy.tapToDraw(language),
-            color = LocalSessionColors.current.Accent,
+            color = circleColor,
             fontSize = 9.sp,
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 1.6.sp,
