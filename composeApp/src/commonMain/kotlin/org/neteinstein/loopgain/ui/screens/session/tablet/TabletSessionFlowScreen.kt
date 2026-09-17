@@ -15,17 +15,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,11 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
-import org.neteinstein.loopgain.domain.model.CardCategory
 import org.neteinstein.loopgain.domain.model.SessionStage
 import org.neteinstein.loopgain.ui.components.HintBanner
-import org.neteinstein.loopgain.ui.components.LevelDots
-import org.neteinstein.loopgain.ui.theme.CardStyles
 import org.neteinstein.loopgain.ui.theme.LocalIsDarkTheme
 import org.neteinstein.loopgain.ui.theme.LocalSessionColors
 import org.neteinstein.loopgain.ui.theme.SessionPalette
@@ -81,18 +75,12 @@ fun TabletSessionFlowScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showHistory by remember { mutableStateOf(false) }
-    var revealCategory by remember { mutableStateOf<CardCategory?>(null) }
-
-    LaunchedEffect(state.stage) {
-        if (state.stage != SessionStage.DRAW) revealCategory = null
-    }
 
     val namedCount = state.people.count { it.name.isNotBlank() }
     val colors = if (LocalIsDarkTheme.current) SessionPaletteDark else SessionPalette
 
     CompositionLocalProvider(LocalSessionColors provides colors) {
-    Box(modifier = modifier.fillMaxSize().background(LocalSessionColors.current.Background)) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = modifier.fillMaxSize().background(LocalSessionColors.current.Background)) {
             TabletHeader(
                 headerMeta = when {
                     showHistory -> SessionCopy.sessionLogHeaderMeta(state.language)
@@ -124,26 +112,11 @@ fun TabletSessionFlowScreen(
                     TabletStageContent(
                         state = state,
                         viewModel = viewModel,
-                        revealCategory = revealCategory,
-                        onOpenReveal = { category -> revealCategory = category },
                         onFinish = onFinish,
                     )
                 }
             }
         }
-
-        if (!showHistory) {
-            revealCategory?.let { category ->
-                TabletRevealOverlay(
-                    category = category,
-                    state = state,
-                    onDrawAnother = { viewModel.drawOne(category) },
-                    onNext = { next -> viewModel.drawOne(next); revealCategory = next },
-                    onClose = { revealCategory = null },
-                )
-            }
-        }
-    }
     }
 }
 
@@ -151,8 +124,6 @@ fun TabletSessionFlowScreen(
 private fun TabletStageContent(
     state: SessionUiState,
     viewModel: SessionViewModel,
-    revealCategory: CardCategory?,
-    onOpenReveal: (CardCategory) -> Unit,
     onFinish: () -> Unit,
 ) {
     when (state.stage) {
@@ -167,11 +138,7 @@ private fun TabletStageContent(
 
         SessionStage.DRAW -> TabletDrawScreen(
             state = state,
-            onTapPile = { category ->
-                val alreadyDrawn = state.piles.firstOrNull { it.category == category }?.isDrawn == true
-                if (!alreadyDrawn) viewModel.drawOne(category)
-                onOpenReveal(category)
-            },
+            onTapPile = viewModel::drawOne,
             onRedraw = viewModel::redrawAll,
             onStartWrite = viewModel::startWriteDirectly,
         )
@@ -298,131 +265,6 @@ private fun TabletStepTabs(currentStage: SessionStage, language: org.neteinstein
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 1.4.sp,
                 )
-            }
-        }
-    }
-}
-
-/**
- * The tablet's read-equivalent: a full-screen reveal for one drawn card, opened by tapping a pile
- * on [TabletDrawScreen]. "DRAW ANOTHER" redraws just this category; the right-hand button either
- * reveals the next undrawn category or, once all four are drawn, closes back to the board.
- */
-@Composable
-private fun TabletRevealOverlay(
-    category: CardCategory,
-    state: SessionUiState,
-    onDrawAnother: () -> Unit,
-    onNext: (CardCategory) -> Unit,
-    onClose: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val card = state.drawnCards.firstOrNull { it.category == category } ?: return
-    val nextUndrawn = state.piles.firstOrNull { !it.isDrawn }?.category
-    val swatch = CardStyles.forCategory(category).containerColor
-
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color(0xD6071B33))
-            .padding(46.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(
-            modifier = Modifier
-                .widthIn(max = 760.dp)
-                .fillMaxWidth()
-                .border(1.dp, LocalSessionColors.current.AccentBright)
-                .background(LocalSessionColors.current.Background)
-                .padding(horizontal = 36.dp, vertical = 30.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Box(modifier = Modifier.width(24.dp).height(3.dp).background(swatch))
-                    Text(
-                        text = card.label.uppercase(),
-                        color = swatch,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 2.sp,
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    LevelDots(
-                        level = card.level,
-                        activeColor = swatch,
-                        inactiveColor = LocalSessionColors.current.Disabled,
-                        dotSize = 8.dp,
-                    )
-                    Text(
-                        text = SessionCopy.levelLabel(card.level, state.language),
-                        color = LocalSessionColors.current.MutedLabel,
-                        fontSize = 10.sp,
-                        letterSpacing = 1.4.sp,
-                    )
-                    Box(modifier = Modifier.width(1.dp).height(14.dp).background(LocalSessionColors.current.Border))
-                    Text(text = card.code, color = LocalSessionColors.current.MutedLabel, fontSize = 11.sp, letterSpacing = 1.2.sp)
-                }
-            }
-
-            Text(
-                text = SessionCopy.readAloud(state.language),
-                color = LocalSessionColors.current.MutedLabel,
-                fontSize = 10.sp,
-                letterSpacing = 1.6.sp,
-            )
-
-            Text(
-                text = card.text,
-                color = LocalSessionColors.current.Ink,
-                fontSize = 34.sp,
-                fontWeight = FontWeight.Bold,
-                lineHeight = 40.sp,
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth().border(width = 1.dp, color = LocalSessionColors.current.Border).padding(top = 18.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = card.about,
-                    color = LocalSessionColors.current.MutedLabel,
-                    fontSize = 12.sp,
-                    modifier = Modifier.weight(1f).padding(top = 18.dp),
-                )
-                Row(modifier = Modifier.padding(top = 18.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(
-                        onClick = onDrawAnother,
-                        shape = RoundedCornerShape(4.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = LocalSessionColors.current.Accent),
-                    ) {
-                        Text(
-                            text = SessionCopy.drawAnother(state.language),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 1.2.sp,
-                        )
-                    }
-                    Button(
-                        onClick = { if (nextUndrawn != null) onNext(nextUndrawn) else onClose() },
-                        shape = RoundedCornerShape(4.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = LocalSessionColors.current.Accent,
-                            contentColor = LocalSessionColors.current.OnAccent,
-                        ),
-                    ) {
-                        val label = nextUndrawn?.let {
-                            SessionCopy.nextCategoryCard(it.displayName(state.language), state.language)
-                        } ?: SessionCopy.backToBoard(state.language)
-                        Text(text = label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp)
-                    }
-                }
             }
         }
     }

@@ -1,7 +1,6 @@
 package org.neteinstein.loopgain.ui.viewmodel
 
 import org.neteinstein.loopgain.domain.model.CardCategory
-import org.neteinstein.loopgain.domain.model.CardLevel
 import org.neteinstein.loopgain.domain.model.Language
 import org.neteinstein.loopgain.domain.model.SessionConfig
 import org.neteinstein.loopgain.domain.model.SessionStage
@@ -157,27 +156,6 @@ internal object SessionCopy {
     // languages; purely static section labels (e.g. "CLOCKWISE ORDER") stay as literals in the
     // tablet composables, matching the precedent already set by the phone screens above.
 
-    fun levelLabel(level: CardLevel?, language: Language): String {
-        if (level == null) return dash
-        return if (language == Language.PT) "NÍVEL ${level.dots} DE 3" else "LEVEL ${level.dots} OF 3"
-    }
-
-    fun readAloud(language: Language): String =
-        if (language == Language.PT) "LÊ ISTO EM VOZ ALTA" else "READ THIS TO THE ROOM"
-
-    fun drawAnother(language: Language): String =
-        if (language == Language.PT) "TIRAR OUTRA" else "DRAW ANOTHER"
-
-    fun nextCategoryCard(categoryLabel: String, language: Language): String =
-        if (language == Language.PT) {
-            "SEGUINTE: CARTA ${categoryLabel.uppercase()} →"
-        } else {
-            "NEXT: ${categoryLabel.uppercase()} CARD →"
-        }
-
-    fun backToBoard(language: Language): String =
-        if (language == Language.PT) "VOLTAR AO TABULEIRO →" else "BACK TO THE BOARD →"
-
     fun historyMeta(participants: Int, minutes: Int, language: Language): String {
         val word = if (language == Language.PT) {
             if (participants == 1) "pessoa" else "pessoas"
@@ -323,9 +301,6 @@ internal object SessionCopy {
         language == Language.PT -> "TIRA AS QUATRO PARA CONTINUAR"
         else -> "DRAW ALL FOUR TO CONTINUE"
     }
-
-    fun drawnTapToReadAgain(language: Language): String =
-        if (language == Language.PT) "tirada — toca para reler" else "drawn — tap to read again"
 
     fun tapToDraw(language: Language): String = if (language == Language.PT) "TOCA PARA TIRAR" else "TAP TO DRAW"
 

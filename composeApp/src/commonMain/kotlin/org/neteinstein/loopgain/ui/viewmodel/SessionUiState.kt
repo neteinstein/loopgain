@@ -72,6 +72,8 @@ data class PileUi(
     val level: CardLevel?,
     val availableCount: Int,
     val heldBackCount: Int,
+    /** The drawn card's face, for screens that show its question text instead of just [code]. */
+    val face: CardFaceUi?,
 )
 
 data class CardFaceUi(
@@ -140,16 +142,17 @@ fun SessionState.toUiState(
         startLabel = if (ready) SessionCopy.startLabel(language) else SessionCopy.addNamesToStart(language),
         canStart = ready,
         piles = CardCategory.ORDER.map { category ->
-            val card = drawn[category]
+            val drawnCard = drawn[category]
             val pool = cardRepository.pool(category, levels[category], heldBackIds)
             PileUi(
                 category = category,
                 label = category.displayName(language),
-                isDrawn = card != null,
-                code = card?.code,
+                isDrawn = drawnCard != null,
+                code = drawnCard?.code,
                 level = levels[category],
                 availableCount = pool.drawable.size,
                 heldBackCount = pool.heldBack,
+                face = drawnCard?.toCardFaceUi(language),
             )
         },
         drawnCount = drawn.size,

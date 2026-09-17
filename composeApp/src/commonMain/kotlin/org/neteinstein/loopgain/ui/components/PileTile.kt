@@ -2,7 +2,6 @@ package org.neteinstein.loopgain.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,16 +18,35 @@ import org.neteinstein.loopgain.ui.theme.LocalSessionColors
 import org.neteinstein.loopgain.ui.viewmodel.PileUi
 import org.neteinstein.loopgain.ui.viewmodel.SessionCopy
 
-/** One of the four draw piles: face-down until tapped, then shows its drawn code. */
+/**
+ * One of the four draw piles: face-down until tapped, then shows the drawn card's question text.
+ * Tapping it again draws a new card for that category, which flips the tile via [PileFlip] — as
+ * if the old card were tucked to the bottom of the pile and the next one turned face-up.
+ */
 @Composable
 fun PileTile(pile: PileUi, language: Language, onTap: () -> Unit, modifier: Modifier = Modifier) {
+    PileFlip(pile = pile, onTap = onTap, modifier = modifier.fillMaxSize()) { shown ->
+        val face = shown.face
+        if (shown.isDrawn && face != null) {
+            QuestionCardFace(
+                card = face,
+                modifier = Modifier.fillMaxSize(),
+                showFooter = false,
+                compact = true,
+            )
+        } else {
+            FaceDownPileTile(pile = shown, language = language, modifier = Modifier.fillMaxSize())
+        }
+    }
+}
+
+@Composable
+private fun FaceDownPileTile(pile: PileUi, language: Language, modifier: Modifier = Modifier) {
     val swatch = CardStyles.forCategory(pile.category).containerColor
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .border(1.dp, swatch.copy(alpha = if (pile.isDrawn) 0.55f else 0.3f))
-            .background(swatch.copy(alpha = if (pile.isDrawn) 0.2f else 0.1f))
-            .clickable(onClick = onTap)
+            .border(1.dp, swatch.copy(alpha = 0.3f))
+            .background(swatch.copy(alpha = 0.1f))
             .padding(11.dp),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
@@ -49,13 +67,13 @@ fun PileTile(pile: PileUi, language: Language, onTap: () -> Unit, modifier: Modi
         }
         Column {
             Text(
-                text = pile.code ?: "TAP",
+                text = "TAP",
                 color = LocalSessionColors.current.Ink,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = SessionCopy.pileAvailabilityLabel(pile.isDrawn, pile.availableCount, pile.heldBackCount, language),
+                text = SessionCopy.pileAvailabilityLabel(false, pile.availableCount, pile.heldBackCount, language),
                 color = LocalSessionColors.current.MutedSecondary,
                 fontSize = 10.sp,
                 modifier = Modifier.padding(top = 4.dp),

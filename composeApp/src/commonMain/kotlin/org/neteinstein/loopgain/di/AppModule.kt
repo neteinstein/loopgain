@@ -14,7 +14,7 @@ import org.neteinstein.loopgain.data.repository.SettingsRepository
 import org.neteinstein.loopgain.domain.model.SessionConfig
 import org.neteinstein.loopgain.ui.viewmodel.SessionViewModel
 
-val appModule = module {
+internal val appModule = module {
     single { DefaultCardRepository() } bind CardRepository::class
     single { InMemorySessionHistoryRepository() } bind SessionHistoryRepository::class
     single { platformKeyValueStore() }

@@ -55,7 +55,7 @@ fun SessionDrawScreen(
                         pile = pile,
                         language = state.language,
                         onTap = { onTapPile(pile.category) },
-                        modifier = Modifier.aspectRatio(1.05f),
+                        modifier = Modifier.aspectRatio(0.85f),
                     )
                 }
             }
