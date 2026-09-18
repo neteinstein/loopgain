@@ -140,7 +140,9 @@ failure.
 ## Gotchas
 
 - **Koin is started on both platforms.** `LoopGainApplication.onCreate()` calls `initKoin()` on
-  Android; `iosApp/iosApp/iOSApp.swift`'s `init()` calls `InitKoinKt.initKoin()` on iOS.
+  Android; `iosApp/iosApp/iOSApp.swift`'s `init()` calls `InitKoinKt.doInitKoin()` on iOS (Kotlin/
+  Native's Objective-C exporter renames an `init`-prefixed top-level function to avoid colliding
+  with Objective-C's `init` initializer convention).
   `initKoin()` lives in its own file (`di/InitKoin.kt`), apart from `di/AppModule.kt`'s
   `appModule` — see that file's doc comment for why. If you add a second KMP entry point, it
   needs the same call or the first `koinViewModel()`/`get()` there will throw.
