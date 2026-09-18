@@ -98,12 +98,12 @@ fun SessionSetupScreen(
                 modifier = Modifier.padding(top = 20.dp, bottom = 9.dp),
             )
             LazyVerticalGrid(
-                columns = GridCells.Fixed(4),
+                columns = GridCells.Fixed(3),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier.height(180.dp),
             ) {
-                items(state.depthPickers) { depth ->
+                items(state.depthPickers.filter { it.hasLevels }) { depth ->
                     DepthPickerTile(depth = depth, onPick = { onPickLevel(depth.category, it) })
                 }
             }
