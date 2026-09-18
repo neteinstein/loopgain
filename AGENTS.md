@@ -140,9 +140,12 @@ failure.
 ## Gotchas
 
 - **Koin is started on both platforms.** `LoopGainApplication.onCreate()` calls `initKoin()` on
-  Android; `iosApp/iosApp/iOSApp.swift`'s `init()` calls `AppModuleKt.initKoin()` on iOS. If you
-  add a second KMP entry point, it needs the same call or the first `koinViewModel()`/`get()`
-  there will throw.
+  Android; `iosApp/iosApp/iOSApp.swift`'s `init()` calls `InitKoinKt.doInitKoin()` on iOS (Kotlin/
+  Native's Objective-C exporter renames an `init`-prefixed top-level function to avoid colliding
+  with Objective-C's `init` initializer convention).
+  `initKoin()` lives in its own file (`di/InitKoin.kt`), apart from `di/AppModule.kt`'s
+  `appModule` — see that file's doc comment for why. If you add a second KMP entry point, it
+  needs the same call or the first `koinViewModel()`/`get()` there will throw.
 - **`THEME.md` is partly wrong.** It prescribes white typography on every card. The printed
   deck uses **navy** text on the three light cards (white only on the navy Motto card), and it
   marks difficulty with **dots**, not stars — the spreadsheet's asterisks are just its notation.
