@@ -23,6 +23,14 @@ class TabletStepsTest {
             listOf("CONFIGURAÇÃO", "TIRAR", "ESCREVER", "RONDAS", "FECHAR", "REGISTADA"),
             tabletStepLabels(Language.PT),
         )
+        assertEquals(
+            listOf("CONFIGURACIÓN", "SACAR", "ESCRIBIR", "RONDAS", "CIERRE", "REGISTRADA"),
+            tabletStepLabels(Language.ES),
+        )
+        assertEquals(
+            listOf("CONFIGURATION", "TIRER", "ÉCRIRE", "TOURS", "CLÔTURE", "ENREGISTRÉE"),
+            tabletStepLabels(Language.FR),
+        )
     }
 
     @Test

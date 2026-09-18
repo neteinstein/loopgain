@@ -14,8 +14,8 @@ LoopGain is built following modern Kotlin Multiplatform architecture, enabling c
   "facilitator board" (step tabs, reveal overlay, session history panel) sharing one view model
 - ✅ **48-Card Bundled Deck**: Motto, Positive Reinforcement, Improvements and Personal Question
   cards, drawn with level filtering and "held back" history so recent cards don't repeat
-- ✅ **Bilingual**: English/Portuguese content and UI copy, with Spanish/French selectable in
-  Settings (falls back to English until PT-equivalent content exists)
+- ✅ **Multilingual**: English, Portuguese, Spanish and French content and UI copy, selectable in
+  Settings
 - ✅ **Settings**: theme switching (Light/Dark/System), language picker, and card-history reset
 - ✅ **Modern Architecture**: Koin-driven DI, an MVVM session view model over `StateFlow`, and a
   Compose-free domain layer
@@ -181,7 +181,7 @@ To enable Firebase features:
 
 Tests live in `commonTest` and run on the JVM via `./gradlew testDebugUnitTest` — this is what CI
 checks on every PR. Coverage includes the bundled deck, the session engine and its config math,
-session/settings repositories, language fallback, and navigation routes.
+session/settings repositories, multilingual content, and navigation routes.
 
 ## 📄 License
 

@@ -13,11 +13,14 @@ data class QuestionCard(
     val level: CardLevel?,
     val en: String,
     val pt: String,
+    val es: String,
+    val fr: String,
 ) {
-    /** Falls back to [en] for [Language.ES] / [Language.FR] — the deck has no translation yet. */
     fun text(language: Language): String = when (language) {
+        Language.EN -> en
         Language.PT -> pt
-        Language.EN, Language.ES, Language.FR -> en
+        Language.ES -> es
+        Language.FR -> fr
     }
 
     /** Short code matching the printed deck's own notation, e.g. "P-03". */
