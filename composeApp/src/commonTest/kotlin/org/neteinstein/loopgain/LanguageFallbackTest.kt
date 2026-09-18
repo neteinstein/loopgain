@@ -7,31 +7,33 @@ import org.neteinstein.loopgain.data.source.bundledDeck
 import org.neteinstein.loopgain.domain.model.CardCategory
 import org.neteinstein.loopgain.domain.model.Language
 
-/**
- * The deck and its category names are only authored in EN/PT. ES and FR are UI-selectable (see
- * Settings) but must read in English, not silently fall through to Portuguese.
- */
+/** The deck and its category names are fully authored in EN/PT/ES/FR — no language falls back to another. */
 class LanguageFallbackTest {
 
     @Test
-    fun spanishAndFrenchCardTextFallsBackToEnglish() {
+    fun everyCardHasNonBlankTextInEveryLanguage() {
+        bundledDeck.forEach { card ->
+            Language.entries.forEach { language ->
+                assertTrue(card.text(language).isNotBlank(), "${card.id} is blank for $language")
+            }
+        }
+    }
+
+    @Test
+    fun cardTextMatchesItsOwnLanguageField() {
         val card = bundledDeck.first()
-        assertEquals(card.en, card.text(Language.ES))
-        assertEquals(card.en, card.text(Language.FR))
         assertEquals(card.en, card.text(Language.EN))
-    }
-
-    @Test
-    fun portugueseCardTextIsUnaffected() {
-        val card = bundledDeck.first()
         assertEquals(card.pt, card.text(Language.PT))
+        assertEquals(card.es, card.text(Language.ES))
+        assertEquals(card.fr, card.text(Language.FR))
     }
 
     @Test
-    fun spanishAndFrenchCategoryNamesFallBackToEnglish() {
+    fun everyCategoryHasNonBlankDisplayNameInEveryLanguage() {
         CardCategory.entries.forEach { category ->
-            assertEquals(category.displayNameEn, category.displayName(Language.ES))
-            assertEquals(category.displayNameEn, category.displayName(Language.FR))
+            Language.entries.forEach { language ->
+                assertTrue(category.displayName(language).isNotBlank(), "$category is blank for $language")
+            }
         }
     }
 

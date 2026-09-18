@@ -53,12 +53,14 @@ class SessionUiStateTest {
     }
 
     @Test
-    fun spanishAndFrenchFallBackToEnglishContent() {
+    fun spanishAndFrenchTogglesCopyAndCategoryNames() {
         val config = SessionConfig()
         val es = SessionState().toUiState(config, Language.ES, repository)
         val fr = SessionState().toUiState(config, Language.FR, repository)
-        assertEquals("ADD NAMES TO START", es.startLabel)
-        assertEquals("ADD NAMES TO START", fr.startLabel)
+        assertEquals("AÑADE NOMBRES PARA EMPEZAR", es.startLabel)
+        assertEquals("AJOUTE DES NOMS POUR COMMENCER", fr.startLabel)
+        assertEquals("Lema", es.depthPickers.first { it.category == CardCategory.MOTTO }.label)
+        assertEquals("Devise", fr.depthPickers.first { it.category == CardCategory.MOTTO }.label)
     }
 
     @Test

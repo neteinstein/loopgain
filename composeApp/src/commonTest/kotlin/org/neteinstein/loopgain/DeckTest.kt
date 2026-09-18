@@ -45,10 +45,12 @@ class DeckTest {
     }
 
     @Test
-    fun everyCardHasBilingualText() {
+    fun everyCardHasTextInEveryLanguage() {
         bundledDeck.forEach { card ->
             assertTrue(card.en.isNotBlank(), "${card.id} is missing English text")
             assertTrue(card.pt.isNotBlank(), "${card.id} is missing Portuguese text")
+            assertTrue(card.es.isNotBlank(), "${card.id} is missing Spanish text")
+            assertTrue(card.fr.isNotBlank(), "${card.id} is missing French text")
         }
     }
 

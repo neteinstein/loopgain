@@ -25,22 +25,29 @@ Generate `BundledDeck.kt` with `--kotlin` and paste the result; do not retype 48
 by hand. The script exits non-zero if any invariant below fails, so it works as a check too —
 run it after regenerating.
 
+**The script only knows EN and PT** — the spreadsheet has no Spanish or French columns. `es` and
+`fr` on every `QuestionCard` are hand-authored translations, not extracted from the sheet. If you
+regenerate `BundledDeck.kt` from `--kotlin` output after the deck itself changes, you must
+re-add/re-translate the `es =` and `fr =` line for every card the script's `en =`/`pt =` pair
+changed — the generated snippet won't have them, and `QuestionCard` won't compile without all
+four.
+
 ## The shape of the deck
 
-48 cards, four categories of 12, every card bilingual (EN + PT):
+48 cards, four categories of 12, every card authored in EN, PT, ES and FR:
 
-| Category | Enum | PT name | Levels |
-| --- | --- | --- | --- |
-| Motto | `MOTTO` | Mote | **none** |
-| Positive Reinforcement | `POSITIVE_REINFORCEMENT` | Reforço Positivo | 4 × L1, 4 × L2, 4 × L3 |
-| Improvements | `IMPROVEMENTS` | Melhorias | 4 × L1, 4 × L2, 4 × L3 |
-| Personal Question | `PERSONAL_QUESTION` | Pergunta Pessoal | 4 × L1, 4 × L2, 4 × L3 |
+| Category | Enum | PT name | ES name | FR name | Levels |
+| --- | --- | --- | --- | --- | --- |
+| Motto | `MOTTO` | Mote | Lema | Devise | **none** |
+| Positive Reinforcement | `POSITIVE_REINFORCEMENT` | Reforço Positivo | Refuerzo Positivo | Renforcement Positif | 4 × L1, 4 × L2, 4 × L3 |
+| Improvements | `IMPROVEMENTS` | Melhorias | Mejoras | Améliorations | 4 × L1, 4 × L2, 4 × L3 |
+| Personal Question | `PERSONAL_QUESTION` | Pergunta Pessoal | Pregunta Personal | Question Personnelle | 4 × L1, 4 × L2, 4 × L3 |
 
 Invariants worth asserting in `commonTest` (the script checks the same ones):
 
 - 48 cards total, 12 per category, ids unique.
 - Every Motto card has `level == null`; the other three categories have exactly 4 per level.
-- Every card has non-blank EN **and** PT text.
+- Every card has non-blank EN, PT, ES and FR text.
 
 **Motto having no level is a product constraint, not missing data.** `QuestionCard.level` is
 nullable because of it, and the Motto section of the picker gets no level filter.
