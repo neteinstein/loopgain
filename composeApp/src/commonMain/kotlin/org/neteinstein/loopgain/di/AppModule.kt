@@ -1,6 +1,5 @@
 package org.neteinstein.loopgain.di
 
-import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -21,10 +20,4 @@ internal val appModule = module {
     single { DefaultSettingsRepository(get()) } bind SettingsRepository::class
     single { SessionConfig() }
     viewModel { SessionViewModel(get(), get(), get(), get()) }
-}
-
-fun initKoin() {
-    startKoin {
-        modules(appModule)
-    }
 }
