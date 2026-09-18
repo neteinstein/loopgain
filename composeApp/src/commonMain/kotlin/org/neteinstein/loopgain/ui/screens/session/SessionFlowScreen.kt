@@ -14,6 +14,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
 import org.neteinstein.loopgain.domain.model.SessionStage
 import org.neteinstein.loopgain.ui.components.HintBanner
+import org.neteinstein.loopgain.ui.components.KeepScreenOn
 import org.neteinstein.loopgain.ui.components.SessionHeader
 import org.neteinstein.loopgain.ui.theme.LocalIsDarkTheme
 import org.neteinstein.loopgain.ui.theme.LocalSessionColors
@@ -37,6 +38,8 @@ fun SessionFlowScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val colors = if (LocalIsDarkTheme.current) SessionPaletteDark else SessionPalette
+
+    KeepScreenOn(enabled = state.sessionRunning)
 
     CompositionLocalProvider(LocalSessionColors provides colors) {
         Column(modifier = modifier.fillMaxSize().background(LocalSessionColors.current.Background)) {
